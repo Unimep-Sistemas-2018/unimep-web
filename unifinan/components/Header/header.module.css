@@ -1,0 +1,47 @@
+.mainContainer{
+    width: 1200px;
+    margin: 0 auto;
+    box-shadow: 1px;
+}
+
+.logo{
+    width: 58px !important;
+    height: 58px !important;
+    margin-right: 10px;
+}
+
+.alinha_logo{
+    display: flex;
+    align-items: center;
+    
+}
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+.nomeEmpresa{
+    font-family: 'Bebas Neue', cursive;
+    font-size: 38px;
+    font-weight: 400;
+}
+
+.cardHeader {
+    padding: .3rem 1rem;
+    margin-bottom: 0;
+    background-color: #D8BE38 !important;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    border-radius: 10px 10px 0px 0px;
+}
+
+.links{
+    font-family: 'Bebas Neue', cursive;
+    font-size: 20px;
+    font-weight: 400;
+    text-decoration: none;
+    color: black;
+    display: inline-block;
+}
+
+.headerIcon{
+    margin-top: 20px !important;
+    padding-left:25px;
+}
+
+

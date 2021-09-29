@@ -7,7 +7,7 @@ import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-export default function Home() {
+export default function Login() {
   return (
     <Container>
       {/*mb significa "margin-bottom", parece que não está funcionando */}
