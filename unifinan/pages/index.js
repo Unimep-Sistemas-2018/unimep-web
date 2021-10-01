@@ -8,7 +8,7 @@ import Form from 'react-bootstrap/Form';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-export default function Home() {
+export default function Login() {
   return (
         <Container className=" mt-5">
           <Container className=" d-flex justify-content-center mt-5 pt-5">
