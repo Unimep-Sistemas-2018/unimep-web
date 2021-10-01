@@ -16,18 +16,18 @@ export default function Login() {
               <Card.Img variant="top" className="pb-5 pt-3 px-5" src="./logo.png" style={{height: "45%"}}>
               </Card.Img>
               <Container className="d-flex flex-column px-5">
-                <Button className="mb-2" style={{height: "2.75rem"}} variant="warning">Fazer Login</Button>
-                <Button style={{height: "2.75rem"}} variant="warning">Criar uma conta</Button>
+                <Button className="mb-2" style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "2.75rem"}} variant="secondary">Fazer Login</Button>
+                <Button style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "2.75rem"}} variant="secondary">Criar uma conta</Button>
                 <Container className="my-4" style={{color: "LightGray"}}>
                   <hr />
                 </Container>
               </Container>
               <Card.Text>
                   <Link href="#">
-                    <a className="text-warning" style={{fontSize: "2rem"}} >Entrar sem fazer login</a>
+                    <a className="text-warning" style={{fontSize: "1.25rem", textDecoration: "none"}} >Usar o site sem fazer login</a>
                   </Link>
-                  <Container className="d-flex flex-column mt-4" style={{color: "LightGray", fontSize: "0.95rem"}}>
-                    (Se você entrar sem se logar, seus dados ficarão disponíveis apenas localmente neste dispositivo, e serão apagados caso você delete os cookies do navegador)
+                  <Container className="d-flex flex-column mt-2" style={{color: "LightGray", fontSize: "1rem"}}>
+                    (Seus dados ficarão disponíveis apenas neste dispositivo)
                   </Container>
                 </Card.Text>
             </Card>
