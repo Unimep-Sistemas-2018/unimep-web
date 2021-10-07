@@ -7,7 +7,7 @@ import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 
-import {CSSTransition, TransitionGroup} from 'react-transition-group';
+import {CSSTransition} from 'react-transition-group';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -62,17 +62,36 @@ export default function Login() {
 
   let varCard = VerificarVarCard(logando, setLogando);
 
-  useEffect(()=>{varCard = VerificarVarCard(logando, setLogando)});
+  //O primeiro useEffect roda só na primeira vez, o segundo roda a cada renderização
+  useEffect(()=>{
+    const htmlStyle = document.querySelector('html').style;
+    const bodyStyle = document.querySelector('body').style;
+
+    htmlStyle.height = "100%";
+    htmlStyle.width = "100%";
+    
+    bodyStyle.alignItems = "center";
+    bodyStyle.display = "flex";
+    bodyStyle.height = "100%";
+    bodyStyle.justifyContent = "center";
+    bodyStyle.width = "100%";}, []
+    );
+
+  useEffect(()=>{
+    varCard = VerificarVarCard(logando, setLogando)}
+    );
+
+    
 
   return (
-            <CSSTransition classNames="fade" key={0} in={logando} timeout={400}>
-              <Card bg="dark" className="align-items-center border border-secondary d-flex justify-content-center px-4 text-center" property={0} style={{height: "42rem", width: "35rem"}} text="warning">
-                <Card.Img className="mb-2" variant="top" src="./logo.png" style={{maxHeight: "40%", width: "auto"}}>
-                </Card.Img>
-                <Container className="d-flex flex-column px-5">
-                  {varCard}
-                  </Container>
-              </Card>
-            </CSSTransition>
+          <CSSTransition classNames="fade" key={0} in={logando} timeout={400}>
+            <Card bg="dark" className="align-items-center border border-secondary d-flex justify-content-center px-4 text-center" property={0} style={{height: "42rem", width: "35rem"}} text="warning">
+              <Card.Img className="mb-2" variant="top" src="./logo.png" style={{maxHeight: "40%", width: "auto"}}>
+              </Card.Img>
+              <Container className="d-flex flex-column px-5">
+                {varCard}
+                </Container>
+            </Card>
+          </CSSTransition>
   )
 }
