@@ -19,12 +19,12 @@ const VerificarVarCard = (logando, setLogando) => {
         <>
         <Container className="d-flex flex-column mt-4">
           <Button className="mb-2" onClick={() => {setLogando(true);}} style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "2.75rem"}} variant="secondary">Fazer Login</Button>
-          <Button style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "2.75rem"}} variant="secondary">Criar uma conta</Button>
+          <Button href={"cadastro"} style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "2.75rem"}} variant="secondary">Criar uma conta</Button>
           <Container className="my-4" style={{color: "LightGray"}}>
             <hr />
           </Container>
         </Container>
-        <Link href="#">
+        <Link href="home">
           <a className="text-warning" style={{fontSize: "1.25rem", textDecoration: "none"}}>Usar o site sem fazer login</a>
         </Link>
         <Container className="d-flex flex-column mt-2" style={{color: "LightGray", fontSize: "1rem"}}>

@@ -15,8 +15,8 @@ export default function Header() {
                     </div>
                     <div className="col-4 col-md-4 col-lg-4 col-xl-4 text-center">
                         <div className={"row mt-4"}>
-                            <div className="col-6 col-md-6 col-lg-6 col-xl-6"><a className={header.links} href={""}>Visão Geral</a></div>
-                            <div className="col-6 col-md-6 col-lg-6 col-xl-6"><a className={header.links} href={""}>Relatórios</a></div>
+                            <div className="col-6 col-md-6 col-lg-6 col-xl-6"><a className={header.links} href={"home"}>Visão Geral</a></div>
+                            <div className="col-6 col-md-6 col-lg-6 col-xl-6"><a className={header.links} href={"relatorios"}>Relatórios</a></div>
                         </div>
                     </div>
                     <div className="col-4 col-md-4 col-lg-4 col-xl-4 text-end">
