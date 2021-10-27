@@ -20,6 +20,7 @@ export default function Cadastro() {
           <form>
             <input type="text" id="name" name="name" placeholder="Nome Completo"/>
             <input type="email" id="email" name="email" placeholder="E-Mail"/>
+            <input type="text" id="cpf" name="cpf" placeholder="CPF"/>
             <input type="password" id="key" name="key" placeholder="Sua Senha"/>
             <input type="password" id="confKey" name="confKey" placeholder="Confirme sua Senha"/>
             <input type="submit" value="Cadastrar"/>
