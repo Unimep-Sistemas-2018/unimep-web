@@ -21,15 +21,11 @@ export default function Header() {
                     </div>
                     <div className="col-4 col-md-4 col-lg-4 col-xl-4 text-end">
                         <div>
-
                             <img src="/user-icon.png" className={header.headerIcon} />
                             <img src="/logout.png" className={header.headerIcon} />
-
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </header>
     )
