@@ -8,12 +8,13 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
+import Spinner from "react-bootstrap/Spinner";
 
 import {CSSTransition} from 'react-transition-group';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const handleClick = async (email, senha,setInvalido) => {
+const HandleClick = async (email, senha,setInvalido, setCarregando) => {
   if (email == "" || senha == ""){
     console.log("Insira as suas credenciais para prosseguir com o login")
   }
@@ -27,7 +28,10 @@ const handleClick = async (email, senha,setInvalido) => {
       "Content-type": "application/x-www-form-urlencoded",
       method: "POST",
       body: formData}
+      
     const url ="https://unifinan-api.herokuapp.com/oauth/token";
+
+    setCarregando(true);
 
     await fetch(url, headers)
       .then((response) => response.json())
@@ -44,11 +48,10 @@ const handleClick = async (email, senha,setInvalido) => {
       }
     }).catch(error => {
       console.log("Error: ", error)});
-
   }
 };
 
-const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha, setInvalido) => {
+const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha, setInvalido, carregando, setCarregando) => {
   if (typeof varCard == 'undefined'){
     if (logando !== true){
       //varCard são os campos que podem variar dentro do card
@@ -56,7 +59,7 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
         <Container className="mt-4">
         <Container className="d-flex flex-column mt-5">
           <Button className="mb-3" onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
-          <Button style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "3rem"}} variant="secondary">Criar uma conta</Button>
+          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Criar uma conta</Button>
           {/* <Container className="my-4" style={{color: "LightGray"}}>
             <hr />
           </Container> */}
@@ -74,11 +77,11 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
       return (
           <Form className="d-flex flex-column mt-0 px-4" id="form_login">
             <Form.Group className="mb-3" controlId="formEmail">
-              <Form.Label>E-mail</Form.Label>
+              <Form.Label style={{color: "Gold"}}>E-mail</Form.Label>
               <Form.Control name="username" onChange={e => setEmail(e.target.value)} placeholder="Seu e-mail" value={email} type="email" />
             </Form.Group>
             <Form.Group className="mb-4" controlId="formSenha">
-              <Form.Label>Senha</Form.Label>
+              <Form.Label style={{color: "Gold"}}>Senha</Form.Label>
               <Form.Control name="password" onChange={e => setSenha(e.target.value)} placeholder="Sua senha" value={senha} type="password"/>
             </Form.Group>
               {/* <Form.Group className="d-flex mb-3" controlId="formformCheck">
@@ -87,8 +90,13 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
                 <label>Mantenha-me conectado</label>
                 </Container>
               </Form.Group> */}
-            {/* Não pode colocar a função handleClick direto, se não ele chama independente de clicar. Por isso está dentro de uma função anônima. */}
-            <Button onClick={() => handleClick(email, senha, setInvalido)} style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "3rem"}}  variant="secondary">Entrar</Button>
+            <div className="d-flex justify-content-start">
+              {/* Não pode colocar a função HandleClick direto, se não ele chama independente de clicar. Por isso está dentro de uma função anônima. */}
+              <Button className="text-center" onClick={() => HandleClick(email, senha, setInvalido, setCarregando)} style={{color: "Gold", fontWeight:"600", height: "3rem", width:"100%"}}  variant="secondary">
+                {!carregando && "Entrar"}
+                {carregando && <Spinner animation="border" style={{color:"Gold"}} />}
+              </Button>
+            </div>
           </Form>
       )
     }
@@ -115,10 +123,11 @@ const VerificarInvalido = (invalido) => {
 export default function Login() {
   const [logando, setLogando] = useState(false);
   const [invalido, setInvalido] = useState(false);
+  const [carregando, setCarregando] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  let varCard = VerificarVarCard(logando, setLogando, email, setEmail, senha, setSenha, setInvalido);
+  let varCard = VerificarVarCard(logando, setLogando, email, setEmail, senha, setSenha, setInvalido, carregando, setCarregando);
   let alerta = VerificarInvalido(invalido);
 
   //O primeiro useEffect roda só quando a página carregar da primeira vez, o segundo roda a cada renderização
