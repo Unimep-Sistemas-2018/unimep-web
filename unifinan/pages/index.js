@@ -56,9 +56,9 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
     if (logando !== true){
       //varCard são os campos que podem variar dentro do card
       return (
-        <Container className="mt-4">
+        <Container className="mt-3">
         <Container className="d-flex flex-column mt-5">
-          <Button className="mb-3" onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
+          <Button className="mt-5 mb-4" onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
           <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Criar uma conta</Button>
           {/* <Container className="my-4" style={{color: "LightGray"}}>
             <hr />
@@ -75,12 +75,12 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
     }
     else {
       return (
-          <Form className="d-flex flex-column mt-0 px-4" id="form_login">
-            <Form.Group className="mb-3" controlId="formEmail">
+          <Form className="d-flex flex-column mt-1 mb-0 px-4" id="form_login">
+            <Form.Group className="mt-2 mb-2" controlId="formEmail">
               <Form.Label style={{color: "Gold"}}>E-mail</Form.Label>
               <Form.Control name="username" onChange={e => setEmail(e.target.value)} placeholder="Seu e-mail" value={email} type="email" />
             </Form.Group>
-            <Form.Group className="mb-4" controlId="formSenha">
+            <Form.Group className="mb-3" controlId="formSenha">
               <Form.Label style={{color: "Gold"}}>Senha</Form.Label>
               <Form.Control name="password" onChange={e => setSenha(e.target.value)} placeholder="Sua senha" value={senha} type="password"/>
             </Form.Group>
@@ -90,7 +90,7 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
                 <label>Mantenha-me conectado</label>
                 </Container>
               </Form.Group> */}
-            <div className="d-flex justify-content-start">
+            <div className="d-flex justify-content-start mt-2">
               {/* Não pode colocar a função HandleClick direto, se não ele chama independente de clicar. Por isso está dentro de uma função anônima. */}
               <Button className="text-center" onClick={() => HandleClick(email, senha, setInvalido, setCarregando)} style={{color: "Gold", fontWeight:"600", height: "3rem", width:"100%"}}  variant="secondary">
                 {!carregando && "Entrar"}
@@ -157,7 +157,7 @@ export default function Login() {
               <Container className="pt-4">
                 <Card bg="dark" className="align-items-center border border-secondary d-flex justify-content-start px-4 text-center mt-5" property={0} style={{height: "35rem", width: "35rem"}} text="warning">
                   <Container className="mt-2"> 
-                    <Card.Img className="mt-5 mb-1" variant="top" src="./logo-transparente.png" style={{maxHeight: "100%", width: "auto"}}>
+                    <Card.Img className="mt-5 mb-1" variant="top" src="./logo-bg-transparente.png" style={{maxHeight: "100%", width: "auto"}}>
                     </Card.Img>
                   </Container>
                   <Container className="d-flex flex-column px-4">
