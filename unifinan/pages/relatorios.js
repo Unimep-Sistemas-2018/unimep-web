@@ -15,6 +15,7 @@ const TratarParametros = () => {
     const parametros = new URLSearchParams(search);
 
     if(typeof parametros == 'undefined'){
+        console.log('parametros is undefined');
         Router.push('/home');
     }
 
@@ -29,73 +30,98 @@ const TratarParametros = () => {
 
     const pagina = parametros.get('pagina');
     const itensPorPagina = parametros.get('itensPorPagina');
+
+    console.log(conta, mes, ano, pagina, itensPorPagina);
     
     if (typeof conta == 'undefined' || typeof mes == 'undefined' || typeof ano == 'undefined' || typeof pagina == 'undefined' || typeof itensPorPagina == 'undefined'){
+        console.log('algum parametro é undefined');
         Router.push('/', '/');
     }
     else{
-        return [conta, mes, ano, anoBissexto, pagina, itensPorPagina, anoBissexto];
+        return {conta: conta, mes: mes, ano: ano, pagina: pagina, itensPorPagina: itensPorPagina, anoBissexto: anoBissexto};
     }
 
 }
 
-const PrepararTransacoes = (transacoes, anoBissexto) => {
-    const diasPorMes= {
-        "Janeiro": 31,
-        "Março": 31,
-        "Abril": 30,
-        "Maio": 31,
-        "Junho": 30,
-        "Julho": 31,
-        "Agosto": 31,
-        "Setembro": 30,
-        "Outubro": 31,
-        "Novembro": 30,
-        "Dezembro": 31
+const PrepararTransacoes = (transacoes, anoBissexto, mes) => {
+    const messesPorExtenso={
+        1: "Janeiro",
+        2: "Fevereiro",
+        3: "Março",
+        4: "Abril",
+        5: "Maio",
+        6: "Junho",
+        7: "Julho",
+        8: "Agosto",
+        9: "Setembro",
+        10: "Outubro",
+        11: "Novembro",
+        12: "Dezembro"
+    }
+
+    const mesExtenso = messesPorExtenso[mes];
+
+    let diasPorMes= {
+        Janeiro: 31,
+        Março: 31,
+        Abril: 30,
+        Maio: 31,
+        Junho: 30,
+        Julho: 31,
+        Agosto: 31,
+        Setembro: 30,
+        Outubro: 31,
+        Novembro: 30,
+        Dezembro: 31
     }
 
     if (anoBissexto == true) {
-        diasPorMes.push({key: "Fevereiro", value: 29})
+        diasPorMes["Fevereiro"] = 29;
     }
 
     else {
-        diasPorMes.push({key: "Fevereiro", value: 28})
+        diasPorMes["Fevereiro"] = 28;
     }
 
-    let transacoesPorDia = [];
+    let transacoesPorDia = {};
 
-    for (let i = 0; i < diasPorMes.length; i++){
+    const quantiaDias = diasPorMes[mesExtenso];
+
+    for (const diaIndex in quantiaDias) {
         //checar se a key dia virou "dia" (exemplo: as keys devem ser "1","2","3" ao inserir os dias "1,2,3")
-        transacoesPorDia.push({dia: []});
-    }
+        dia = diaIndex + 1;
+        diaString = String(dia);
+        transacoesPorDia[diaString] = [];
+      }
 
     let diasJaContabilizados = [];
 
-    for(transacao in transacoes){
-        const arrayDia = transacao.dtTransacao.split('-');
-        const diaAtual = arrayDia[0];
+    for (let i; i < transacoes.length; i++){
+        const arrayData = i.dtTransacao.split('-');
+        const diaAtual = arrayData[0];
 
         //Verifica se esse dia já existe no array "listaDias" (se não existe, o resultado será "-1")
         if (diasJaContabilizados.indexOf(diaAtual) == -1){
             array.push(diaAtual);
         }
 
-        transacoesPorDia[String(diaAtual)].push(transacao.valor);
+        transacoesPorDia[String(diaAtual)].push(i.valor);
     }
 
     //essa lista tem todas as entradas e saídas separadas por dia
     return transacoesPorDia;
 }
 
-const Requisicao = async (token, parametros, setRequisitando) => {
+const Requisicao = async (token, parametros, setRequisitando, setEntradasESaidas, setTransacoes) => {
     const headers = {
     headers: {"Authorization": `Bearer ${token}`},
     "Content-type": "application/x-www-form-urlencoded",
     method: "GET"}
 
-    //verificar depois se vieram todos os parametros, e se sao numeros válidos?
+    //verificar depois se vieram todos os parametros, e se sao numeros válidos. Atualmente, se isso acontece, ou da pagina 404, ou da erro 401 e volta pro login
 
-    const url =`https://unifinan-api.herokuapp.com/transacoes?conta=${parametros[0]}&mes=${parametros[1]}&ano=${parametros[2]}&pagina=${parametros[3]}&itensPorPagina=${parametros[4]}`;
+    const url =`https://unifinan-api.herokuapp.com/transacoes?conta=${parametros.conta}&mes=${parametros.mes}&ano=${parametros.ano}&pagina=${parametros.pagina}&itensPorPagina=${parametros.itensPorPagina}`;
+    console.log(url);
 
     setRequisitando(true);
 
@@ -103,63 +129,81 @@ const Requisicao = async (token, parametros, setRequisitando) => {
       .then((response) => response.json())
     .then(response2 => {
       if (typeof response2.content == 'undefined' || response2.content == null){
+        console.log('response2 é undefined (certeza que o usuario e senha estavam corretos?)');
         Router.push('/', '/');
       }
       else{
-        console.log("Sucesso: " + response2.content)
-        const transacoes = response2.content;
-        transacoesPorDia = PrepararTransacoes(transacoes, parametros[5]);
-        etEntradasESaidas(transacoesPorDia);
+        console.log("Sucesso: " + response2.content);
+        setTransacoes(response2.content);
+
+        mesInt = String(parametros.mes).replace('0', '');
+        const transacoesPorDia = PrepararTransacoes(response2.content, parametros.anoBissexto, mesInt);
+        
+        setEntradasESaidas(transacoesPorDia);
         setRequisitando(false);
       }
     }).catch(error => {
       console.log("Error: ", error)});
 }
 
-const ExibirTransacoes = (transacoes) => {
-
-    transacoes.map((item) => {
-        let entradas = [];
-        let saidas = [];
-        for (let i = 0; i < entradasESaidas(item).length; i++){
-            if (i >= 0){
-                entradas.push(i);
+const ExibirTransacoes = (transacoes, entradasESaidas) => {    
+    console.log(entradasESaidas);
+    //Object.keys(objeto) retorna um array contendo o nome de todas as chaves (keys) daquele objeto
+    const listaDias = Object.keys(entradasESaidas);
+    let indexAtual = 0;
+    if (typeof entradasESaidas[indexAtual] != 'undefined') {
+        transacoes.map(
+            (listaDias) => {
+            let entradas = [];
+            let saidas = [];
+    
+            for (let i = 0; i < entradasESaidas[indexAtual].length; i++){
+                if (transacoes[item] >= 0){
+                    entradas.push(i);
+                }
+    
+                else {
+                    saidas.push(i);
+                }
             }
-            else {
-                saidas.push(i);
+    
+            let entradaTotal = 0;
+            let saidaTotal = 0;
+    
+            for (let i; i < entradas.length; i++){
+                entradaTotal += i;
             }
-        }
-
-        let entradaTotal = 0;
-        let saidaTotal = 0;
-
-        for (entrada in entradas){
-            entradaTotal += entrada;
-        }
-        for (saida in saidas){
-            saidaTotal += saida;
-        }
-        
-        //é uma soma pois o valor de "saidaTotal" é negativo (ou nulo)
-        const resultado = entradaTotal + saidaTotal;
-        return(
-            <div>
-                <tr key={item.id}>
-                    <td>{dia}</td>
-                    <td>{entradaTotal}</td>
-                    <td>{saidaTotal}</td>
-                    <td>{resultado}</td>
-                    {/* calcular saldo, pegar saldo antigo de algum lugar (talvez do mes anterior?) e somar com a entradaTotal e a saidaTotal, ou somar com a lista com todas as entradas*/}
-                    <td>{}</td>
-                </tr>
-            </div>
-        );
-    })
+    
+            for (let i; i < saidas.length; i++){
+                saidaTotal += i;
+            }
+    
+            indexAtual += 1;
+    
+            const dia = indexAtual + 1;
+            
+            //é uma soma pois o valor de "saidaTotal" é negativo (ou nulo)
+            const resultado = entradaTotal + saidaTotal;
+            return(
+                <div>
+                    <tr key={indexAtual}>
+                        <td>{dia}</td>
+                        <td>{entradaTotal}</td>
+                        <td>{saidaTotal}</td>
+                        <td>{resultado}</td>
+                        {/* calcular saldo, pegar saldo antigo de algum lugar (talvez do mes anterior?) e somar com a entradaTotal e a saidaTotal, ou somar com a lista com todas as entradas*/}
+                        <td>{}</td>
+                    </tr>
+                </div>
+            );
+        });
+    }
 }
 
 export default function Relatorio() {
-    const [entradasESaidas, setEntradasESaidas] = useState(false);
+    const [entradasESaidas, setEntradasESaidas] = useState([]);
     const [requisitando, setRequisitando] = useState(false);
+    const [transacoes, setTransacoes] = useState([]);
     //Apenas roda na primeira vez que a página carrega
     useEffect(()=>{
         const parametros = TratarParametros();
@@ -179,10 +223,11 @@ export default function Relatorio() {
         const token = localStorage.getItem('token');
 
         if(typeof token == null){
+            console.log('token é null');
             Router.push('/', '/');
         }
 
-        Requisicao(token, parametros, setRequisitando);
+        Requisicao(token, parametros, setRequisitando, setEntradasESaidas, setTransacoes);
     }, []);
 
     return (
@@ -212,7 +257,7 @@ export default function Relatorio() {
     
                 <tbody>
                     {/*usar map para incluir informações*/}
-                    {typeof transacoes == 'undefined' ? null : ExibirTransacoes(transacoes)}
+                    {typeof transacoes == 'undefined' ? null : ExibirTransacoes(transacoes, entradasESaidas)}
                 </tbody>
             </Table>
         </Container>  
