@@ -15,27 +15,27 @@ const TratarParametros = () => {
     const parametros = new URLSearchParams(search);
 
     if(typeof parametros == 'undefined'){
-        console.log('parametros is undefined');
-        Router.push('/home');
+        console.log("'parametros' é undefined, retornando a página inicial");
+        Router.push("/home");
     }
 
-    const conta = parametros.get('conta');
-    const mes = parametros.get('mes');
-    const ano = parametros.get('ano');
+    const conta = parametros.get("conta");
+    const mes = parametros.get("mes");
+    const ano = parametros.get("ano");
 
     const anoBissexto = false;
     if (ano % 4 == 0){
         const anoBissexto = true;
     }
 
-    const pagina = parametros.get('pagina');
-    const itensPorPagina = parametros.get('itensPorPagina');
+    const pagina = parametros.get("pagina");
+    const itensPorPagina = parametros.get("itensPorPagina");
 
-    console.log(conta, mes, ano, pagina, itensPorPagina);
+    console.log("Parâmetros: ", conta, mes, ano, pagina, itensPorPagina);
     
-    if (typeof conta == 'undefined' || typeof mes == 'undefined' || typeof ano == 'undefined' || typeof pagina == 'undefined' || typeof itensPorPagina == 'undefined'){
-        console.log('algum parametro é undefined');
-        Router.push('/', '/');
+    if (typeof conta == "undefined" || typeof mes == "undefined" || typeof ano == "undefined" || typeof pagina == "undefined" || typeof itensPorPagina == "undefined"){
+        console.log('Um ou mais parâmetros são undefined');
+        Router.push("/", "/");
     }
     else{
         return {conta: conta, mes: mes, ano: ano, pagina: pagina, itensPorPagina: itensPorPagina, anoBissexto: anoBissexto};
@@ -112,7 +112,7 @@ const PrepararTransacoes = (transacoes, anoBissexto, mes) => {
     return transacoesPorDia;
 }
 
-const Requisicao = async (token, parametros, setRequisitando, setEntradasESaidas, setTransacoes) => {
+const Requisicao = async (token, parametros, requisitou, setRequisitou, setEntradasESaidas, setTransacoes) => {
     const headers = {
     headers: {"Authorization": `Bearer ${token}`},
     "Content-type": "application/x-www-form-urlencoded",
@@ -121,37 +121,39 @@ const Requisicao = async (token, parametros, setRequisitando, setEntradasESaidas
     //verificar depois se vieram todos os parametros, e se sao numeros válidos. Atualmente, se isso acontece, ou da pagina 404, ou da erro 401 e volta pro login
 
     const url =`https://unifinan-api.herokuapp.com/transacoes?conta=${parametros.conta}&mes=${parametros.mes}&ano=${parametros.ano}&pagina=${parametros.pagina}&itensPorPagina=${parametros.itensPorPagina}`;
-    console.log(url);
-
-    setRequisitando(true);
 
     await fetch(url, headers)
       .then((response) => response.json())
     .then(response2 => {
-      if (typeof response2.content == 'undefined' || response2.content == null){
-        console.log('response2 é undefined (certeza que o usuario e senha estavam corretos?)');
-        Router.push('/', '/');
+      if (typeof response2.content == "undefined" || response2.content == null){
+        console.log("response2 é undefined (certeza que o usuario e senha estavam corretos?)");
+        Router.push("/", "/");
       }
       else{
         console.log("Sucesso: " + response2.content);
         setTransacoes(response2.content);
 
-        mesInt = String(parametros.mes).replace('0', '');
+        const mesInt = String(parametros.mes).replace('0', '');
         const transacoesPorDia = PrepararTransacoes(response2.content, parametros.anoBissexto, mesInt);
-        
-        setEntradasESaidas(transacoesPorDia);
-        setRequisitando(false);
+
+        if (transacoesPorDia !== []) {
+            if (requisitou == false){
+                setRequisitou(true);
+                setEntradasESaidas(transacoesPorDia);
+            }
+        }
       }
     }).catch(error => {
       console.log("Error: ", error)});
 }
 
 const ExibirTransacoes = (transacoes, entradasESaidas) => {    
-    console.log(entradasESaidas);
     //Object.keys(objeto) retorna um array contendo o nome de todas as chaves (keys) daquele objeto
+    console.log(transacoes);
+    console.log(entradasESaidas);
     const listaDias = Object.keys(entradasESaidas);
     let indexAtual = 0;
-    if (typeof entradasESaidas[indexAtual] != 'undefined') {
+    if (typeof entradasESaidas[indexAtual] != "undefined") {
         transacoes.map(
             (listaDias) => {
             let entradas = [];
@@ -202,9 +204,10 @@ const ExibirTransacoes = (transacoes, entradasESaidas) => {
 
 export default function Relatorio() {
     const [entradasESaidas, setEntradasESaidas] = useState([]);
-    const [requisitando, setRequisitando] = useState(false);
+    const [requisitou, setRequisitou] = useState(false);
     const [transacoes, setTransacoes] = useState([]);
-    //Apenas roda na primeira vez que a página carrega
+
+    //Apenas roda na primeira vez que a página renderiza
     useEffect(()=>{
         const parametros = TratarParametros();
         const htmlStyle = document.querySelector('html').style;
@@ -223,11 +226,15 @@ export default function Relatorio() {
         const token = localStorage.getItem('token');
 
         if(typeof token == null){
-            console.log('token é null');
-            Router.push('/', '/');
+            console.log("'token' é null");
+            Router.push("/", "/");
         }
-
-        Requisicao(token, parametros, setRequisitando, setEntradasESaidas, setTransacoes);
+        else {
+            if (requisitou == false){
+                Requisicao(token, parametros, requisitou, setRequisitou, setEntradasESaidas, setTransacoes);
+            }
+        }
+            
     }, []);
 
     return (
@@ -257,7 +264,7 @@ export default function Relatorio() {
     
                 <tbody>
                     {/*usar map para incluir informações*/}
-                    {typeof transacoes == 'undefined' ? null : ExibirTransacoes(transacoes, entradasESaidas)}
+                    {typeof transacoes == "undefined" ? null : ExibirTransacoes(transacoes, entradasESaidas)}
                 </tbody>
             </Table>
         </Container>  
