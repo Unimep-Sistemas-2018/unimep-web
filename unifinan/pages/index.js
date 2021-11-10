@@ -8,12 +8,13 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
+import Spinner from "react-bootstrap/Spinner";
 
 import {CSSTransition} from 'react-transition-group';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const HandleClick = async (email, senha,setInvalido) => {
+const HandleClick = async (email, senha,setInvalido, setCarregando) => {
   if (email == "" || senha == ""){
     console.log("Insira as suas credenciais para prosseguir com o login")
   }
@@ -30,6 +31,8 @@ const HandleClick = async (email, senha,setInvalido) => {
       
     const url ="https://unifinan-api.herokuapp.com/oauth/token";
 
+    setCarregando(true);
+
     await fetch(url, headers)
       .then((response) => response.json())
     .then(response2 => {
@@ -39,24 +42,24 @@ const HandleClick = async (email, senha,setInvalido) => {
       }
       else{
         setInvalido(false);
-        console.log("Sucesso: " + response2.access_token)
+        console.log("Sucesso: " + response2.access_token);
         localStorage.setItem('token', response2.access_token);
-        Router.push('/home')
+        Router.push('/home');
       }
     }).catch(error => {
       console.log("Error: ", error)});
   }
 };
 
-const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha, setInvalido) => {
+const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha, setInvalido, carregando, setCarregando) => {
   if (typeof varCard == 'undefined'){
     if (logando !== true){
       //varCard são os campos que podem variar dentro do card
       return (
-        <Container className="mt-4">
+        <Container className="mt-3">
         <Container className="d-flex flex-column mt-5">
-          <Button className="mb-3" onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
-          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} href={"cadastro"} variant="secondary">Criar uma conta</Button>
+          <Button className="mt-5 mb-4" onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
+          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} href="cadastro" variant="secondary">Criar uma conta</Button>
           {/* <Container className="my-4" style={{color: "LightGray"}}>
             <hr />
           </Container> */}
@@ -72,13 +75,13 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
     }
     else {
       return (
-          <Form className="d-flex flex-column mt-0 px-4" id="form_login">
-            <Form.Group className="mb-3" controlId="formEmail">
-              <Form.Label>E-mail</Form.Label>
+          <Form className="d-flex flex-column mt-1 mb-0 px-4" id="form_login">
+            <Form.Group className="mt-2 mb-2" controlId="formEmail">
+              <Form.Label style={{color: "Gold"}}>E-mail</Form.Label>
               <Form.Control name="username" onChange={e => setEmail(e.target.value)} placeholder="Seu e-mail" value={email} type="email" />
             </Form.Group>
-            <Form.Group className="mb-4" controlId="formSenha">
-              <Form.Label>Senha</Form.Label>
+            <Form.Group className="mb-3" controlId="formSenha">
+              <Form.Label style={{color: "Gold"}}>Senha</Form.Label>
               <Form.Control name="password" onChange={e => setSenha(e.target.value)} placeholder="Sua senha" value={senha} type="password"/>
             </Form.Group>
               {/* <Form.Group className="d-flex mb-3" controlId="formformCheck">
@@ -87,8 +90,13 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
                 <label>Mantenha-me conectado</label>
                 </Container>
               </Form.Group> */}
-            {/* Não pode colocar a função HandleClick direto, se não ele chama independente de clicar. Por isso está dentro de uma função anônima. */}
-            <Button onClick={() => HandleClick(email, senha, setInvalido)} style={{color: "rgba(var(--bs-warning-rgb),var(--bs-text-opacity))", fontWeight:"600", height: "3rem"}}  variant="secondary">Entrar</Button>
+            <div className="d-flex justify-content-start mt-2">
+              {/* Não pode colocar a função HandleClick direto, se não ele chama independente de clicar. Por isso está dentro de uma função anônima. */}
+              <Button className="text-center" onClick={() => HandleClick(email, senha, setInvalido, setCarregando)} style={{color: "Gold", fontWeight:"600", height: "3rem", width:"100%"}}  variant="secondary">
+                {!carregando && "Entrar"}
+                {carregando && <Spinner animation="border" style={{color:"Gold"}} />}
+              </Button>
+            </div>
           </Form>
       )
     }
@@ -115,10 +123,11 @@ const VerificarInvalido = (invalido) => {
 export default function Login() {
   const [logando, setLogando] = useState(false);
   const [invalido, setInvalido] = useState(false);
+  const [carregando, setCarregando] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  let varCard = VerificarVarCard(logando, setLogando, email, setEmail, senha, setSenha, setInvalido);
+  let varCard = VerificarVarCard(logando, setLogando, email, setEmail, senha, setSenha, setInvalido, carregando, setCarregando);
   let alerta = VerificarInvalido(invalido);
 
   //O primeiro useEffect roda só quando a página carregar da primeira vez, o segundo roda a cada renderização
@@ -148,7 +157,7 @@ export default function Login() {
               <Container className="pt-4">
                 <Card bg="dark" className="align-items-center border border-secondary d-flex justify-content-start px-4 text-center mt-5" property={0} style={{height: "35rem", width: "35rem"}} text="warning">
                   <Container className="mt-2"> 
-                    <Card.Img className="mt-5 mb-1" variant="top" src="./logo-transparente.png" style={{maxHeight: "100%", width: "auto"}}>
+                    <Card.Img className="mt-5 mb-1" variant="top" src="./logo-bg-transparente.png" style={{maxHeight: "100%", width: "auto"}}>
                     </Card.Img>
                   </Container>
                   <Container className="d-flex flex-column px-4">

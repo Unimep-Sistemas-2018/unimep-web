@@ -21,7 +21,7 @@ const Verify = (setCadastro) => {
   if(senhaUm == senhaDois){
     const requestOptions = {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM2MDY4MzM4LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoicllPRzlqaDNYZGxiWlAxcTVGLUpXQ0hIME80IiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.V2T8FhlQYUMfWGCVVFxohWyMLx0hOI_osgZIFRtbLwo', "Content-Type":"application/json;charset=UTF-8" },
+      headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM2NjczMTIxLCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiV204TzdMSm83R2tqcDdJbTNvS0VUc3c5VU5jIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.go95atSW_PDdXczX0to_RwTBWgRQXm-e3fs6ssmzqz8', "Content-Type":"application/json;charset=UTF-8" },
       body: `{"nome":${nome}, "login":${login}, "senha":${senhaUm}, "doc":${doc}}`,
     };
     fetch('https://unifinan-api.herokuapp.com/usuarios/standard', requestOptions)
