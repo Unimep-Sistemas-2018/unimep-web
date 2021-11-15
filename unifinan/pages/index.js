@@ -16,6 +16,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const HandleClick = async (email, senha,setInvalido, setCarregando) => {
   if (email == "" || senha == ""){
+    //Colocar erro
     console.log("Insira as suas credenciais para prosseguir com o login")
   }
 
@@ -37,7 +38,7 @@ const HandleClick = async (email, senha,setInvalido, setCarregando) => {
       .then((response) => response.json())
     .then(response2 => {
       if (typeof response2.access_token == 'undefined' || response2.access_token == null){
-        console.log("indefinido");
+        console.log("token indefinida");
         setInvalido(true);
       }
       else{
