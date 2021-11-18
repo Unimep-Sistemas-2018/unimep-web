@@ -15,27 +15,25 @@ const TratarParametros = () => {
     const parametros = new URLSearchParams(search);
 
     if(typeof parametros == 'undefined'){
-        console.log('parametros is undefined');
-        Router.push('/home');
+        console.log("'parametros' é undefined, retornando a página inicial");
+        Router.push("/home");
     }
 
-    const conta = parametros.get('conta');
-    const mes = parametros.get('mes');
-    const ano = parametros.get('ano');
+    const conta = parametros.get("conta");
+    const mes = parametros.get("mes");
+    const ano = parametros.get("ano");
 
     const anoBissexto = false;
     if (ano % 4 == 0){
-        const anoBissexto = true;
+        anoBissexto = true;
     }
 
-    const pagina = parametros.get('pagina');
-    const itensPorPagina = parametros.get('itensPorPagina');
-
-    console.log(conta, mes, ano, pagina, itensPorPagina);
+    const pagina = parametros.get("pagina");
+    const itensPorPagina = parametros.get("itensPorPagina");
     
-    if (typeof conta == 'undefined' || typeof mes == 'undefined' || typeof ano == 'undefined' || typeof pagina == 'undefined' || typeof itensPorPagina == 'undefined'){
-        console.log('algum parametro é undefined');
-        Router.push('/', '/');
+    if (typeof conta == "undefined" || typeof mes == "undefined" || typeof ano == "undefined" || typeof pagina == "undefined" || typeof itensPorPagina == "undefined"){
+        console.log('Um ou mais parâmetros são undefined');
+        Router.push("/", "/");
     }
     else{
         return {conta: conta, mes: mes, ano: ano, pagina: pagina, itensPorPagina: itensPorPagina, anoBissexto: anoBissexto};
@@ -43,7 +41,9 @@ const TratarParametros = () => {
 
 }
 
-const PrepararTransacoes = (transacoes, anoBissexto, mes) => {
+const PrepararTransacoes = (transacoes, anoBissexto, mesString) => {
+    const mes = parseInt(mesString, 10);
+
     const messesPorExtenso={
         1: "Janeiro",
         2: "Fevereiro",
@@ -87,32 +87,37 @@ const PrepararTransacoes = (transacoes, anoBissexto, mes) => {
 
     const quantiaDias = diasPorMes[mesExtenso];
 
-    for (const diaIndex in quantiaDias) {
+    for (let i = 0; i < quantiaDias - 1; i++) {
         //checar se a key dia virou "dia" (exemplo: as keys devem ser "1","2","3" ao inserir os dias "1,2,3")
-        dia = diaIndex + 1;
-        diaString = String(dia);
-        transacoesPorDia[diaString] = [];
+        const dia = i + 1;
+        transacoesPorDia[dia] = [];
       }
 
     let diasJaContabilizados = [];
 
-    for (let i; i < transacoes.length; i++){
-        const arrayData = i.dtTransacao.split('-');
-        const diaAtual = arrayData[0];
+    for (let i = 0; i < transacoes.length; i++){
+        const arrayData = transacoes[i].dtTransacao.split('-');
+        const diaAtual = arrayData[2].substring(0,2);
 
         //Verifica se esse dia já existe no array "listaDias" (se não existe, o resultado será "-1")
         if (diasJaContabilizados.indexOf(diaAtual) == -1){
-            array.push(diaAtual);
+            diasJaContabilizados.push(diaAtual);
         }
 
-        transacoesPorDia[String(diaAtual)].push(i.valor);
+        //se for uma despesa, o valor deverá ser convertido para negativo
+        if (transacoes[i].tipo === 2) {
+            transacoes[i].valor = -transacoes[i].valor;
+
+        }
+
+        transacoesPorDia[String(diaAtual)].push(transacoes[i].valor);
     }
 
     //essa lista tem todas as entradas e saídas separadas por dia
     return transacoesPorDia;
 }
 
-const Requisicao = async (token, parametros, setRequisitando, setEntradasESaidas, setTransacoes) => {
+const RequisicaoTransacoes = async (token, parametros, requisitou, setRequisitou, setEntradasESaidas, setTransacoes, setMes, setAno, setSaldoAnterior) => {
     const headers = {
     headers: {"Authorization": `Bearer ${token}`},
     "Content-type": "application/x-www-form-urlencoded",
@@ -121,80 +126,126 @@ const Requisicao = async (token, parametros, setRequisitando, setEntradasESaidas
     //verificar depois se vieram todos os parametros, e se sao numeros válidos. Atualmente, se isso acontece, ou da pagina 404, ou da erro 401 e volta pro login
 
     const url =`https://unifinan-api.herokuapp.com/transacoes?conta=${parametros.conta}&mes=${parametros.mes}&ano=${parametros.ano}&pagina=${parametros.pagina}&itensPorPagina=${parametros.itensPorPagina}`;
-    console.log(url);
-
-    setRequisitando(true);
 
     await fetch(url, headers)
       .then((response) => response.json())
     .then(response2 => {
-      if (typeof response2.content == 'undefined' || response2.content == null){
-        console.log('response2 é undefined (certeza que o usuario e senha estavam corretos?)');
-        Router.push('/', '/');
+      if (typeof response2.content == "undefined" || response2.content == null){
+        console.log("response2 é undefined (certeza que o usuario e senha estavam corretos?)");
+        Router.push("/", "/");
       }
       else{
         console.log("Sucesso: " + response2.content);
         setTransacoes(response2.content);
 
-        mesInt = String(parametros.mes).replace('0', '');
-        const transacoesPorDia = PrepararTransacoes(response2.content, parametros.anoBissexto, mesInt);
-        
-        setEntradasESaidas(transacoesPorDia);
-        setRequisitando(false);
+        const mesString = String(parametros.mes).replace('0', '');
+        const transacoesPorDia = PrepararTransacoes(response2.content, parametros.anoBissexto, mesString);
+        if (transacoesPorDia != {}) {
+            if (requisitou == false){
+                setEntradasESaidas(transacoesPorDia);
+                RequisicaoSaldoAnterior(token, parametros, requisitou, setRequisitou);
+            }
+        }
+        else {
+            console.log("A requisição voltou sem dados")
+        }
       }
     }).catch(error => {
       console.log("Error: ", error)});
 }
 
-const ExibirTransacoes = (transacoes, entradasESaidas) => {    
-    console.log(entradasESaidas);
+const RequisicaoSaldoAnterior = async (token, parametros, requisitou, setRequisitou) => {
+    const headers = {
+    headers: {"Authorization": `Bearer ${token}`},
+    "Content-type": "application/x-www-form-urlencoded",
+    method: "GET"}
+
+    //verificar depois se vieram todos os parametros, e se sao numeros válidos. Atualmente, se isso acontece, ou da pagina 404, ou da erro 401 e volta pro login
+
+    const url =`https://unifinan-api.herokuapp.com/contas/${parametros.conta}/saldo?mes=${parametros.mes}&ano=${parametros.ano}`;
+
+    await fetch(url, headers)
+      .then((response) => response.json())
+    .then(response2 => {
+      if (typeof response2.content == "undefined" || response2.content == null){
+        console.log("response2 é undefined (certeza que o usuario e senha estavam corretos?)");
+        Router.push("/", "/");
+      }
+      else{
+        console.log("Sucesso: " + response2.content);
+        if (requisitou == false){
+            setRequisitou(true);
+        }
+
+        else {
+            console.log("A requisição voltou sem dados")
+        }
+      }
+    }).catch(error => {
+      console.log("Error: ", error)});
+}
+
+const ExibirTransacoes = (entradasESaidas) => {    
+    let saldoAtual = 0;
+    //VARIAVEL TEMPORARIA PRA TESTES
+    const saldoAnterior = 1500;
     //Object.keys(objeto) retorna um array contendo o nome de todas as chaves (keys) daquele objeto
     const listaDias = Object.keys(entradasESaidas);
-    let indexAtual = 0;
-    if (typeof entradasESaidas[indexAtual] != 'undefined') {
-        transacoes.map(
-            (listaDias) => {
+    //se listaDias tiver tamanho de 0, significa que "entradasESaidas" também é um objeto vazio
+    if (listaDias.length != 0) {
+        return listaDias.map(
+            (element, index) => {
+            const dia = index + 1;
             let entradas = [];
             let saidas = [];
-    
-            for (let i = 0; i < entradasESaidas[indexAtual].length; i++){
-                if (transacoes[item] >= 0){
-                    entradas.push(i);
-                }
-    
-                else {
-                    saidas.push(i);
-                }
-            }
-    
+
             let entradaTotal = 0;
             let saidaTotal = 0;
-    
-            for (let i; i < entradas.length; i++){
-                entradaTotal += i;
-            }
-    
-            for (let i; i < saidas.length; i++){
-                saidaTotal += i;
-            }
-    
-            indexAtual += 1;
-    
-            const dia = indexAtual + 1;
             
-            //é uma soma pois o valor de "saidaTotal" é negativo (ou nulo)
-            const resultado = entradaTotal + saidaTotal;
+            let resultado = 0;
+
+            //element é somente o número dia, precisamos converter em uma string e colocar entre "[]" após o nome do objeto "entradasESaidas" para procurar por uma propriedade do objeto que tenha como nome esse dia
+            if (entradasESaidas[String(element)].length != 0){
+                const diaAtual = entradasESaidas[String(element)];
+                //itera da primeira transação do dia atual até a última transação do dia atual
+                for (let i = 0; i < diaAtual.length; i++)
+                //ATENCAO: COLOCAR COMPORTAMENTO PRA CASO TENHA 0 TRANSACOES NESSE DIA
+                {
+                    //identifica se é uma entrada, e se for, adiciona à lista de entradas
+                    if (diaAtual[i] >= 0){
+                        entradaTotal += diaAtual[i];
+                        entradas.push(diaAtual[i]);
+                    }
+                    
+                    //se não for uma entrada, então será uma saída. Adiciona à lista de saídas. Como o número é negativo, deverá ser feito uma soma ao valor total de saída
+                    else {
+                        saidaTotal += diaAtual[i];
+                        saidas.push(diaAtual[i]);
+                    }
+                
+                }
+        
+                //é uma soma pois o valor de "saidaTotal" é negativo
+                resultado = entradaTotal + saidaTotal;
+
+                //FALTANDO: vai ter que pegar saldo do último dia do mês anterior usando fetch, guarder em UseState?
+            }
+
+            if (index == 0){
+                saldoAtual = saldoAnterior + resultado;
+            }
+            else {
+                saldoAtual += resultado;
+            }
+
             return(
-                <div>
-                    <tr key={indexAtual}>
-                        <td>{dia}</td>
-                        <td>{entradaTotal}</td>
-                        <td>{saidaTotal}</td>
-                        <td>{resultado}</td>
-                        {/* calcular saldo, pegar saldo antigo de algum lugar (talvez do mes anterior?) e somar com a entradaTotal e a saidaTotal, ou somar com a lista com todas as entradas*/}
-                        <td>{}</td>
-                    </tr>
-                </div>
+                <tr key={index}>
+                    <td>{dia}</td>
+                    <td>{entradaTotal}</td>
+                    <td>{saidaTotal}</td>
+                    <td>{resultado}</td>
+                    <td>{saldoAtual}</td>
+                </tr>
             );
         });
     }
@@ -202,11 +253,22 @@ const ExibirTransacoes = (transacoes, entradasESaidas) => {
 
 export default function Relatorio() {
     const [entradasESaidas, setEntradasESaidas] = useState([]);
-    const [requisitando, setRequisitando] = useState(false);
+    const [requisitou, setRequisitou] = useState(false);
     const [transacoes, setTransacoes] = useState([]);
-    //Apenas roda na primeira vez que a página carrega
+    const [mes, setMes] = useState(null);
+    const [ano, setAno] = useState(null);
+    const [saldoAnterior, setSaldoAnterior] = useState(0);
+
+    //Apenas roda na primeira vez que a página renderiza
     useEffect(()=>{
         const parametros = TratarParametros();
+        if (typeof parametros.mes != 'undefined'){
+            setMes(parametros.mes);
+        }
+        if (typeof parametros.ano != 'undefined'){
+            setAno(parametros.ano);
+        }
+
         const htmlStyle = document.querySelector('html').style;
         const bodyStyle = document.querySelector('body').style;
     
@@ -223,11 +285,15 @@ export default function Relatorio() {
         const token = localStorage.getItem('token');
 
         if(typeof token == null){
-            console.log('token é null');
-            Router.push('/', '/');
+            console.log("'token' é null");
+            Router.push("/", "/");
         }
-
-        Requisicao(token, parametros, setRequisitando, setEntradasESaidas, setTransacoes);
+        else {
+            if (requisitou == false){
+                RequisicaoTransacoes(token, parametros, requisitou, setRequisitou, setEntradasESaidas, setTransacoes, setMes, setAno, setSaldoAnterior);
+            }
+        }
+            
     }, []);
 
     return (
@@ -236,7 +302,7 @@ export default function Relatorio() {
             <Container className="align-items-baseline d-flex mt-3 px-3">
                 <label className="text-center" style={{fontSize: "1.85rem"}}>Relatório:</label>
                 <p className="text-center" style={{fontSize: "1.85rem", width: "100%"}}>
-                    {typeof parametros != 'undefined' ? parametros.mes : null} de {typeof parametros != 'undefined' ? parametros.ano : null}
+                    {typeof mes != 'undefined' ? mes : null} de {typeof ano != 'undefined' ? ano : null}
                     </p>
             </Container>
             {/* definir a width da linha é necessário, do contrário o flexbox a define como 0 */}
@@ -257,7 +323,8 @@ export default function Relatorio() {
     
                 <tbody>
                     {/*usar map para incluir informações*/}
-                    {typeof transacoes == 'undefined' ? null : ExibirTransacoes(transacoes, entradasESaidas)}
+                    {typeof transacoes == "undefined" ? null : ExibirTransacoes(entradasESaidas)}
+                    {typeof transacoes == "undefined" ? console.log("transacao deu undefined") : console.log(transacoes)}
                 </tbody>
             </Table>
         </Container>  
