@@ -1,30 +1,26 @@
 import Header from "../components/Header";
-import {useEffect} from "react";
+import { useEffect } from "react";
+import { useState } from "react";
+
 
 export default function Home() {
 
+    const [atividade, setatividade] = useState()
+
     useEffect(() => {
-        // const requestOptions = {
-        //     method: 'GET',
-        //     headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM1Mzc5NjQ4LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiX19zNE93OGV2akpmUzhRQldjUFM4UENYMkhvIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.HNWNdY_xIhqW2xIbpHDz9_7T2N0dhvW1hPOkhihS3A8' },
-        // };
-        // fetch('https://unifinan-api.herokuapp.com/categorias', requestOptions)
-        // .then(response => response.json())
-        // .then(data => console.log(data))
-        var formData = new FormData()
-        formData.append("username","maria@gmail.com")
-        formData.append("password","123456")
-        formData.append("grant_type","password")
 
         const requestOptions = {
-            method: 'POST',
-            headers: { 'Authorization': 'Basic dW5pZmluYW4tdGVzdDp1bmlmaW5hbi10ZXN0' },
-            body:formData,
-            "Content-Type":"application/x-www-form-urlencoded"
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM2NTA5MTI3LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoid0NGTDVXUXNGOTQ5Q2VMaGVkNzYtNjNXRkkwIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.UcvJJBGhe_Qec7gMAy4rF5KRMGycUuIyv3ioJr3TlS0',
+                "Content-Type": "application/json;charset=UTF-8"
+            }
         };
-        fetch('https://unifinan-api.herokuapp.com/oauth/token', requestOptions)
-        .then(response => response.json())
-        .then(data => console.log(data))
+        fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=07&ano=2021&pagina=0&itensPorPagina=10', requestOptions)
+            .then(response => response.json())
+            .then(data => setatividade(data.content.map(item => item.descricao)))
+            // .then(data => data.content.map(item => (console.log(item.descricao))))
+
     }, [])
 
 
@@ -74,18 +70,7 @@ export default function Home() {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Dados 1</td>
-                                    <td>Dados 2</td>
-                                    <td>Dados 3</td>
-                                    <td>Dados 4</td>
-                                    <td>Dados 5</td>
-                                </tr>
-                                <tr className="">
-                                    <td>Dados 1</td>
-                                    <td>Dados 2</td>
-                                    <td>Dados 3</td>
-                                    <td>Dados 4</td>
-                                    <td>Dados 5</td>
+                                    <td>Descrição: {atividade?.id}</td>
                                 </tr>
                             </tbody>
                         </table>
