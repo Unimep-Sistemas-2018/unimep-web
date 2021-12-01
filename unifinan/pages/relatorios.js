@@ -443,28 +443,31 @@ export default function Relatorio() {
                 </p>
             </Container>
             {/* definir a width da linha é necessário, do contrário o flexbox a define como 0 */}
-            <hr className="mb-3 mt-0" style={{border: "1px solid", borderColor:"blue",width: "100%"}}/>
+            <hr className="mb-1 mt-0" style={{border: "1px solid", borderColor:"blue",width: "100%"}}/>
             <Container className="d-flex flex-column justify-content-around my-5 py-5" style={{height: "300px", width: "100%"}}>
-                {requisitou && <Pie className="my-5" data={grafico1Data} options={{responsive: true, maintainAspectRatio: false}}/>}
+                {requisitou && <Pie className="mt-5" data={grafico1Data} options={{responsive: true, maintainAspectRatio: false}}/>}
+                <hr className="mb-4 mt-4" style={{border: "1px solid", borderColor:"blue",width: "100%"}}/>
                 {requisitou && <Bar className="" data={grafico2Data} options={{responsive: true, maintainAspectRatio: false}} />}
             </Container>
 
             <Container className="mt-5">
-                <Table className="mt-5" striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th style={{fontWeight: "bold"}}>Dia</th>
-                            <th style={{fontWeight: "bold"}}>Entradas</th>
-                            <th style={{fontWeight: "bold"}}>Saídas</th>
-                            <th style={{fontWeight: "bold"}}>Resultado</th>
-                            <th style={{fontWeight: "bold"}}>Saldo</th>
-                        </tr>
-                    </thead>
-        
-                    <tbody>
-                        {typeof transacoes == "undefined" ? null : ExibirTransacoes(entradasESaidas, saldoAnterior)}
-                    </tbody>
-                </Table>
+                <Container className="mt-5">
+                    <Table className="mt-5" striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th style={{fontWeight: "bold"}}>Dia</th>
+                                <th style={{fontWeight: "bold"}}>Entradas</th>
+                                <th style={{fontWeight: "bold"}}>Saídas</th>
+                                <th style={{fontWeight: "bold"}}>Resultado</th>
+                                <th style={{fontWeight: "bold"}}>Saldo</th>
+                            </tr>
+                        </thead>
+            
+                        <tbody>
+                            {typeof transacoes == "undefined" ? null : ExibirTransacoes(entradasESaidas, saldoAnterior)}
+                        </tbody>
+                    </Table>
+                </Container>
             </Container>
         </Container>  
     );
