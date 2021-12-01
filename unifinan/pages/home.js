@@ -1,30 +1,71 @@
 import Header from "../components/Header";
-import {useEffect} from "react";
+import { useEffect } from "react";
+import { useState } from "react";
+
+
+
+
+const monta_lista = (lista_api) => {
+    if (lista_api.length == 0) {
+        return (<tr><td colSpan={5}>Não foram encontrados movimentações</td></tr>)
+    } else {
+        return (lista_api.map((element, index) => {
+            const data_format = new Date(element.dtTransacao)
+            return (
+                //numero,cate,desc,data,valor
+                <tr key={element.id}>
+                    <td>{element.id}</td>
+                    <td>{element.categoria}</td>
+                    <td>{element.descricao}</td>
+                    <td>{data_format.toLocaleDateString()}</td>
+                    <td>{parseFloat(element.valor).toFixed(2)}</td>
+                </tr>
+            )
+        }))
+    }
+}
+
+const monta_saldo = (saldo) => {
+    if (!saldo) {
+        return ("Não foram encontrados movimentações")
+    } else {
+        return (saldo.map((element, index) => {
+            return (
+                element.saldo
+            )
+        }))
+    }
+}
 
 export default function Home() {
 
-    useEffect(() => {
-        // const requestOptions = {
-        //     method: 'GET',
-        //     headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM1Mzc5NjQ4LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiX19zNE93OGV2akpmUzhRQldjUFM4UENYMkhvIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.HNWNdY_xIhqW2xIbpHDz9_7T2N0dhvW1hPOkhihS3A8' },
-        // };
-        // fetch('https://unifinan-api.herokuapp.com/categorias', requestOptions)
-        // .then(response => response.json())
-        // .then(data => console.log(data))
-        var formData = new FormData()
-        formData.append("username","maria@gmail.com")
-        formData.append("password","123456")
-        formData.append("grant_type","password")
+    const requestOptions = {
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM3OTc0MTU0LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoic1h5dDVOUlVwekhGOWxRM0JfbzJJX2tOX2pnIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.fUH5uPmnYYYx7uAWrCpF8YzrQJE3ZprYs_jZcdVSlSo',
+            "Content-Type": "application/json;charset=UTF-8"
+        }
+    };
 
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Authorization': 'Basic dW5pZmluYW4tdGVzdDp1bmlmaW5hbi10ZXN0' },
-            body:formData,
-            "Content-Type":"application/x-www-form-urlencoded"
-        };
-        fetch('https://unifinan-api.herokuapp.com/oauth/token', requestOptions)
+    function carregalista(mes) {
+        
+        fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=' + mes + '&ano=2021&pagina=0&itensPorPagina=10', requestOptions)
+            .then(response => response.json())
+            .then(data => setList_trasancao(data.content))
+    }
+
+    function carregaSaldo(mes) {
+        fetch('https://unifinan-api.herokuapp.com/contas/1/saldo?mes='+ mes +'&ano=2021', requestOptions)
         .then(response => response.json())
-        .then(data => console.log(data))
+        .then(data => setsaldo(data.content))
+    }
+
+    const [list_trasancao, setList_trasancao] = useState([])
+    const [saldo, setsaldo] = useState("")
+
+    useEffect(() => {
+        carregalista(parseInt("07",10))
+        carregaSaldo(parseInt("07",10))
     }, [])
 
 
@@ -47,7 +88,7 @@ export default function Home() {
                     <div className="col-md-4">
                         <div className="card_main border_cards">
                             <p className="text-center card_txtCabecalho">Saldo Atual</p>
-                            <p className="text-center card_txtValor">R$ 1000,00</p>
+                            <p className="text-center card_txtValor">{"R$" +  monta_saldo(saldo)  }</p>
                         </div>
                     </div>
                     <div className="col-md-4">
@@ -73,20 +114,10 @@ export default function Home() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Dados 1</td>
-                                    <td>Dados 2</td>
-                                    <td>Dados 3</td>
-                                    <td>Dados 4</td>
-                                    <td>Dados 5</td>
-                                </tr>
-                                <tr className="">
-                                    <td>Dados 1</td>
-                                    <td>Dados 2</td>
-                                    <td>Dados 3</td>
-                                    <td>Dados 4</td>
-                                    <td>Dados 5</td>
-                                </tr>
+                                {
+                                    //typeof list_trasancao == "undefined" ? null : monta_lista(list_trasancao)
+                                    monta_lista(list_trasancao)
+                                }
                             </tbody>
                         </table>
                     </div>
