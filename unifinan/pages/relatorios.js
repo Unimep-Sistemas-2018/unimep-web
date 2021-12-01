@@ -6,9 +6,37 @@ import Container from 'react-bootstrap/Container';
 
 import Table from 'react-bootstrap/Table';
 
+import { Bar } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
+
 import Header from "../components/Header";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+const CompararValores = (a, b) => {
+    if ( a.total < b.total ){
+        return -1;
+    }
+
+    if ( a.total > b.total ){
+        return 1;
+    }
+
+    return 0;
+      
+}
+
+const CompararDatas = (a, b) => {
+    if ( a.data > b.data ){
+        return -1;
+    }
+
+    if ( a.data < b.data ){
+        return 1;
+    }
+    return 0;
+      
+}
 
 const TratarParametros = () => {
     const search = window.location.search;
@@ -23,7 +51,8 @@ const TratarParametros = () => {
     const mes = parametros.get("mes");
     const ano = parametros.get("ano");
 
-    const anoBissexto = false;
+    let anoBissexto = false;
+
     if (ano % 4 == 0){
         anoBissexto = true;
     }
@@ -41,7 +70,7 @@ const TratarParametros = () => {
 
 }
 
-const PrepararTransacoes = (transacoes, anoBissexto, mesString) => {
+const CalcularDiasNoMes = (mesString, anoBissexto) => {
     const mes = parseInt(mesString, 10);
 
     const messesPorExtenso={
@@ -83,9 +112,14 @@ const PrepararTransacoes = (transacoes, anoBissexto, mesString) => {
         diasPorMes["Fevereiro"] = 28;
     }
 
-    let transacoesPorDia = {};
 
-    const quantiaDias = diasPorMes[mesExtenso];
+    return diasPorMes[mesExtenso];
+}
+
+const PrepararTransacoes = (transacoes, anoBissexto, mesString) => {
+    const quantiaDias = CalcularDiasNoMes(mesString, anoBissexto);
+
+    let transacoesPorDia = {};
 
     for (let i = 0; i < quantiaDias - 1; i++) {
         //checar se a key dia virou "dia" (exemplo: as keys devem ser "1","2","3" ao inserir os dias "1,2,3")
@@ -117,7 +151,7 @@ const PrepararTransacoes = (transacoes, anoBissexto, mesString) => {
     return transacoesPorDia;
 }
 
-const RequisicaoTransacoes = async (token, parametros, requisitou, setRequisitou, setEntradasESaidas, setTransacoes, setMes, setAno, setSaldoAnterior) => {
+const RequisicaoTransacoes = async (token, parametros, requisitou, setEntradasESaidas, setTransacoes) => {
     const headers = {
     headers: {"Authorization": `Bearer ${token}`},
     "Content-type": "application/x-www-form-urlencoded",
@@ -135,7 +169,6 @@ const RequisicaoTransacoes = async (token, parametros, requisitou, setRequisitou
         Router.push("/", "/");
       }
       else{
-        console.log("Sucesso: " + response2.content);
         setTransacoes(response2.content);
 
         const mesString = String(parametros.mes).replace('0', '');
@@ -143,7 +176,6 @@ const RequisicaoTransacoes = async (token, parametros, requisitou, setRequisitou
         if (transacoesPorDia != {}) {
             if (requisitou == false){
                 setEntradasESaidas(transacoesPorDia);
-                RequisicaoSaldoAnterior(token, parametros, requisitou, setRequisitou);
             }
         }
         else {
@@ -154,7 +186,7 @@ const RequisicaoTransacoes = async (token, parametros, requisitou, setRequisitou
       console.log("Error: ", error)});
 }
 
-const RequisicaoSaldoAnterior = async (token, parametros, requisitou, setRequisitou) => {
+const RequisicaoSaldoAnterior = async (token, parametros, requisitou, setSaldoAnterior) => {
     const headers = {
     headers: {"Authorization": `Bearer ${token}`},
     "Content-type": "application/x-www-form-urlencoded",
@@ -167,28 +199,123 @@ const RequisicaoSaldoAnterior = async (token, parametros, requisitou, setRequisi
     await fetch(url, headers)
       .then((response) => response.json())
     .then(response2 => {
-      if (typeof response2.content == "undefined" || response2.content == null){
-        console.log("response2 é undefined (certeza que o usuario e senha estavam corretos?)");
-        Router.push("/", "/");
-      }
-      else{
-        console.log("Sucesso: " + response2.content);
         if (requisitou == false){
-            setRequisitou(true);
+            setSaldoAnterior(response2.content[0].saldo);
         }
-
-        else {
-            console.log("A requisição voltou sem dados")
-        }
-      }
     }).catch(error => {
       console.log("Error: ", error)});
 }
 
-const ExibirTransacoes = (entradasESaidas) => {    
+const RequisicaoGraficoCategorias = async (token, parametros, requisitou, setGrafico1Data) => {
+    const headers = {
+    headers: {"Authorization": `Bearer ${token}`},
+    "Content-type": "application/x-www-form-urlencoded",
+    method: "GET"}
+
+    //verificar depois se vieram todos os parametros, e se sao numeros válidos. Atualmente, se isso acontece, ou da pagina 404, ou da erro 401 e volta pro login
+
+    const url =`https://unifinan-api.herokuapp.com/graficos/despesasPorCategoria?conta=${parametros.conta}&ano=${parametros.ano}&mes=${parametros.mes}`;
+
+    await fetch(url, headers)
+      .then((response) => response.json())
+    .then(response2 => {
+        if (requisitou == false){
+            //ordena as despesas da maior para a menor (todas as que não estiverem entre as maiores irão depois para uma categoria chamada "Outras"))
+            const despesas = response2.despesas.sort(CompararValores);
+            if (despesas.length > 5){
+                let totalDespesasMenores = 0;
+                for (let i = 5; i < despesas.length; i ++){
+                    totalDespesasMenores += despesas[i].total;
+                }
+            }
+
+            //Caso a lista despesas tenha menos que 5 itens, o segundo parâmetro será o tamanho da lista de despesas (é assim que o "splice" funciona)
+            let despesasArrumadas = despesas.slice(0, 5);
+
+            const qtdeMaioresDespesas = despesasArrumadas.length;
+
+            if (typeof totalDespesasMenores != 'undefined') {
+                despesasArrumadas.push({nome : "Outras", total: totalDespesasMenores});
+            }
+
+            let listaLabels = [];
+            let listaValores = [];
+
+            for (let i = 0; i < despesasArrumadas.length; i++){
+                listaLabels.push(despesasArrumadas[i].nome);
+                listaValores.push(despesasArrumadas[i].total)
+            }
+
+            let listaCoresFundo = ['rgba(255, 215, 0, 0.6)',
+            'rgba(128, 128, 128, 0.6)',
+            'rgba(251, 223, 141, 0.6)',
+            'rgba(179, 179, 179, 0.6)',
+            'rgba(232, 232, 232, 0.6)'];
+
+            let listaCoresBorda = ['rgba(255, 215, 0, 1)',
+            'rgba(128, 128, 128, 1)',
+            'rgba(251, 223, 141, 1)',
+            'rgba(179, 179, 179, 1)',
+            'rgba(232, 232, 232, 1)'];
+
+            //corta as listas de cores caso não hajam categorias o suficiente para utilizar todas as cores
+            listaCoresFundo = listaCoresFundo.slice(0,despesasArrumadas.length);
+            listaCoresBorda = listaCoresBorda.slice(0,despesasArrumadas.length);
+
+            const data = {
+                labels: listaLabels, datasets: [{label: "Despesas por categoria", data: listaValores, backgroundColor: listaCoresFundo, borderColor: listaCoresBorda,
+                borderWidth: 1,}]
+        };
+   
+            setGrafico1Data(data);
+        }
+    }).catch(error => {
+      console.log("Error: ", error)});
+}
+
+const RequisicaoGraficoHistorico = async (token, parametros, requisitou, setRequisitou, setGrafico2Data) => {
+    const headers = {
+    headers: {"Authorization": `Bearer ${token}`},
+    "Content-type": "application/x-www-form-urlencoded",
+    method: "GET"}
+
+    //verificar depois se vieram todos os parametros, e se sao numeros válidos. Atualmente, se isso acontece, ou da pagina 404, ou da erro 401 e volta pro login
+
+    const url =`https://unifinan-api.herokuapp.com/graficos/historicoDespesas?conta=${parametros.conta}`;
+
+    await fetch(url, headers)
+      .then((response) => response.json())
+    .then(response2 => {
+        if (requisitou == false){
+            //ordena as despesas da maior para a menor (todas as que não estiverem entre as maiores irão depois para uma categoria chamada "Outras"))
+            const historico = response2.historico.sort(CompararDatas);
+
+            let listaLabels = [];
+            let listaValores = [];
+
+            for (let i = 0; i < historico.length; i++){
+                listaLabels.push(historico[i].data);
+                listaValores.push(historico[i].total)
+            }
+
+            let corFundo = ['rgba(255, 215, 0, 0.6)'];
+
+            let corBorda = ['rgba(255, 215, 0, 1)'];
+
+            const data = {
+                labels: listaLabels, datasets: [{label: "Despesas por categoria", data: listaValores, backgroundColor: corFundo, borderColor: corBorda,
+                borderWidth: 1,}]
+        };
+   
+            setGrafico2Data(data);
+            setRequisitou(true);
+        }
+    }).catch(error => {
+      console.log("Error: ", error)});
+}
+
+const ExibirTransacoes = (entradasESaidas, saldoAnterior) => {    
     let saldoAtual = 0;
-    //VARIAVEL TEMPORARIA PRA TESTES
-    const saldoAnterior = 1500;
     //Object.keys(objeto) retorna um array contendo o nome de todas as chaves (keys) daquele objeto
     const listaDias = Object.keys(entradasESaidas);
     //se listaDias tiver tamanho de 0, significa que "entradasESaidas" também é um objeto vazio
@@ -231,12 +358,16 @@ const ExibirTransacoes = (entradasESaidas) => {
                 //FALTANDO: vai ter que pegar saldo do último dia do mês anterior usando fetch, guarder em UseState?
             }
 
-            if (index == 0){
-                saldoAtual = saldoAnterior + resultado;
+            if (index == 0)
+            {
+                saldoAtual = saldoAnterior;
             }
+
             else {
                 saldoAtual += resultado;
             }
+
+            saldoAtual = saldoAnterior + resultado;
 
             return(
                 <tr key={index}>
@@ -258,9 +389,11 @@ export default function Relatorio() {
     const [mes, setMes] = useState(null);
     const [ano, setAno] = useState(null);
     const [saldoAnterior, setSaldoAnterior] = useState(0);
+    const [grafico1Data,setGrafico1Data] = useState({});
+    const [grafico2Data,setGrafico2Data] = useState({});
 
     //Apenas roda na primeira vez que a página renderiza
-    useEffect(()=>{
+    useEffect(async () =>{
         const parametros = TratarParametros();
         if (typeof parametros.mes != 'undefined'){
             setMes(parametros.mes);
@@ -288,9 +421,13 @@ export default function Relatorio() {
             console.log("'token' é null");
             Router.push("/", "/");
         }
+        
         else {
             if (requisitou == false){
-                RequisicaoTransacoes(token, parametros, requisitou, setRequisitou, setEntradasESaidas, setTransacoes, setMes, setAno, setSaldoAnterior);
+                await RequisicaoTransacoes(token, parametros, requisitou, setEntradasESaidas, setTransacoes);
+                await RequisicaoSaldoAnterior(token, parametros, requisitou, setSaldoAnterior);
+                await RequisicaoGraficoCategorias(token, parametros, requisitou, setGrafico1Data);
+                await RequisicaoGraficoHistorico(token, parametros, requisitou, setRequisitou, setGrafico2Data);
             }
         }
             
@@ -301,32 +438,34 @@ export default function Relatorio() {
             <Header></Header>
             <Container className="align-items-baseline d-flex mt-3 px-3">
                 <label className="text-center" style={{fontSize: "1.85rem"}}>Relatório:</label>
-                <p className="text-center" style={{fontSize: "1.85rem", width: "100%"}}>
+                <p className="text-center" style={{fontSize: "1.85rem", width: "80%"}}>
                     {typeof mes != 'undefined' ? mes : null} de {typeof ano != 'undefined' ? ano : null}
-                    </p>
+                </p>
             </Container>
             {/* definir a width da linha é necessário, do contrário o flexbox a define como 0 */}
-            <hr className="my-0" style={{border: "1px solid", borderColor:"blue",width: "100%"}}/>
-            <Container>
-                gráficos aqui
+            <hr className="mb-3 mt-0" style={{border: "1px solid", borderColor:"blue",width: "100%"}}/>
+            <Container className="d-flex flex-column justify-content-around my-5 py-5" style={{height: "300px", width: "100%"}}>
+                {requisitou && <Pie className="my-5" data={grafico1Data} options={{responsive: true, maintainAspectRatio: false}}/>}
+                {requisitou && <Bar className="" data={grafico2Data} options={{responsive: true, maintainAspectRatio: false}} />}
             </Container>
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th style={{fontWeight: "bold"}}>Dia</th>
-                        <th style={{fontWeight: "bold"}}>Entradas</th>
-                        <th style={{fontWeight: "bold"}}>Saídas</th>
-                        <th style={{fontWeight: "bold"}}>Resultado</th>
-                        <th style={{fontWeight: "bold"}}>Saldo</th>
-                    </tr>
-                </thead>
-    
-                <tbody>
-                    {/*usar map para incluir informações*/}
-                    {typeof transacoes == "undefined" ? null : ExibirTransacoes(entradasESaidas)}
-                    {typeof transacoes == "undefined" ? console.log("transacao deu undefined") : console.log(transacoes)}
-                </tbody>
-            </Table>
+
+            <Container className="mt-5">
+                <Table className="mt-5" striped bordered hover>
+                    <thead>
+                        <tr>
+                            <th style={{fontWeight: "bold"}}>Dia</th>
+                            <th style={{fontWeight: "bold"}}>Entradas</th>
+                            <th style={{fontWeight: "bold"}}>Saídas</th>
+                            <th style={{fontWeight: "bold"}}>Resultado</th>
+                            <th style={{fontWeight: "bold"}}>Saldo</th>
+                        </tr>
+                    </thead>
+        
+                    <tbody>
+                        {typeof transacoes == "undefined" ? null : ExibirTransacoes(entradasESaidas, saldoAnterior)}
+                    </tbody>
+                </Table>
+            </Container>
         </Container>  
     );
 }
