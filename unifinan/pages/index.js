@@ -37,6 +37,7 @@ const HandleClick = async (email, senha,setInvalido, setCarregando) => {
     await fetch(url, headers)
       .then((response) => response.json())
     .then(response2 => {
+      setCarregando(false);
       if (typeof response2.access_token == 'undefined' || response2.access_token == null){
         console.log("token indefinida");
         setInvalido(true);
@@ -60,7 +61,7 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
         <Container className="mt-3">
         <Container className="d-flex flex-column mt-5">
           <Button className="mt-5 mb-4" onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
-          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Criar uma conta</Button>
+          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} onClick={() => {Router.push('/cadastro');}} variant="secondary">Criar uma conta</Button>
           {/* <Container className="my-4" style={{color: "LightGray"}}>
             <hr />
           </Container> */}
