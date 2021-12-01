@@ -36,10 +36,10 @@ const Verify = (setCadastro) => {
   const senhaDois = document.getElementById('confKey').value;
   const doc = document.getElementById('cpf').value;
 
-  if((senhaUm == senhaDois) && (nome != "") && (login != "") && (doc != "")){
+  if((senhaUm == senhaDois) && (nome != "") && (login != "")){
     const requestOptions = {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM2NzY0NjM1LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiclZZbkV0WE5Xbi1FUUF2WWxDMjF1b2pVNFBFIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.iYaK6mQyXfbLAcfbj5ZzqN_qIrth_5-sOx1henWmUn4', "Content-Type":"application/json;charset=UTF-8" },
+      headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM4NDg0NjA0LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiMEZhTlU0bTd0ZEJVZWRiNHBiZkw4NGJHeEJVIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.68UthgP0qXfPkzVRah5bycMY5gBzBh0hfjBAdwEo3Tksdddddddddddddddddddddd', "Content-Type":"application/json;charset=UTF-8" },
       body: `{"nome":"${nome}", "login":"${login}", "senha":"${senhaUm}", "doc":"${doc}"}`,
     };
     fetch('https://unifinan-api.herokuapp.com/usuarios/standard', requestOptions)
@@ -58,7 +58,7 @@ const Verify = (setCadastro) => {
     if(senhaUm != senhaDois){
       alert("Senhas não são compatíveis.");
     } else {
-      alert("Existem campos inválidos. Todos os campos devem ser preenchidos.");
+      alert("Existem campos inválidos.");
     }
   }
 }
