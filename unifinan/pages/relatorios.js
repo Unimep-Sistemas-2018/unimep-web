@@ -70,82 +70,97 @@ const TratarParametros = () => {
 
 }
 
-const CalcularDiasNoMes = (mesString, anoBissexto) => {
-    const mes = parseInt(mesString, 10);
+// const CalcularDiasNoMes = (mesString, anoBissexto) => {
+//     const mes = parseInt(mesString, 10);
 
-    const messesPorExtenso={
-        1: "Janeiro",
-        2: "Fevereiro",
-        3: "Março",
-        4: "Abril",
-        5: "Maio",
-        6: "Junho",
-        7: "Julho",
-        8: "Agosto",
-        9: "Setembro",
-        10: "Outubro",
-        11: "Novembro",
-        12: "Dezembro"
-    }
+//     const messesPorExtenso={
+//         1: "Janeiro",
+//         2: "Fevereiro",
+//         3: "Março",
+//         4: "Abril",
+//         5: "Maio",
+//         6: "Junho",
+//         7: "Julho",
+//         8: "Agosto",
+//         9: "Setembro",
+//         10: "Outubro",
+//         11: "Novembro",
+//         12: "Dezembro"
+//     }
 
-    const mesExtenso = messesPorExtenso[mes];
+//     const mesExtenso = messesPorExtenso[mes];
 
-    let diasPorMes= {
-        Janeiro: 31,
-        Março: 31,
-        Abril: 30,
-        Maio: 31,
-        Junho: 30,
-        Julho: 31,
-        Agosto: 31,
-        Setembro: 30,
-        Outubro: 31,
-        Novembro: 30,
-        Dezembro: 31
-    }
+//     let diasPorMes= {
+//         Janeiro: 31,
+//         Março: 31,
+//         Abril: 30,
+//         Maio: 31,
+//         Junho: 30,
+//         Julho: 31,
+//         Agosto: 31,
+//         Setembro: 30,
+//         Outubro: 31,
+//         Novembro: 30,
+//         Dezembro: 31
+//     }
 
-    if (anoBissexto == true) {
-        diasPorMes["Fevereiro"] = 29;
-    }
+//     if (anoBissexto == true) {
+//         diasPorMes["Fevereiro"] = 29;
+//     }
 
-    else {
-        diasPorMes["Fevereiro"] = 28;
-    }
+//     else {
+//         diasPorMes["Fevereiro"] = 28;
+//     }
 
 
-    return diasPorMes[mesExtenso];
-}
+//     return diasPorMes[mesExtenso];
+// }
 
-const PrepararTransacoes = (transacoes, anoBissexto, mesString) => {
-    const quantiaDias = CalcularDiasNoMes(mesString, anoBissexto);
+// const PrepararTransacoes = (transacoes, anoBissexto, mesString) => {
+const PrepararTransacoes = (transacoes) => {
+    // const quantiaDias = CalcularDiasNoMes(mesString, anoBissexto);
 
     let transacoesPorDia = {};
 
-    for (let i = 0; i < quantiaDias - 1; i++) {
-        //checar se a key dia virou "dia" (exemplo: as keys devem ser "1","2","3" ao inserir os dias "1,2,3")
-        const dia = i + 1;
-        transacoesPorDia[dia] = [];
-      }
+    // for (let i = 0; i < quantiaDias - 1; i++) {
+    //     //checar se a key dia virou "dia" (exemplo: as keys devem ser "1","2","3" ao inserir os dias "1,2,3")
+    //     const dia = i + 1;
+    //     transacoesPorDia[dia] = [];
+    // }
+    
+    for (let i = 0; i < transacoes.length; i++) {
+        const data = transacoes[i].dtTransacao.split('-');
+        const dia = data[2].substring(0,2);
+        // const diaInt = parseInt(diaString, 10);
 
-    let diasJaContabilizados = [];
-
-    for (let i = 0; i < transacoes.length; i++){
-        const arrayData = transacoes[i].dtTransacao.split('-');
-        const diaAtual = arrayData[2].substring(0,2);
-
-        //Verifica se esse dia já existe no array "listaDias" (se não existe, o resultado será "-1")
-        if (diasJaContabilizados.indexOf(diaAtual) == -1){
-            diasJaContabilizados.push(diaAtual);
+        //Verifica se esse dia já não existia no objeto
+        if (typeof transacoesPorDia[dia] == "undefined") {
+            transacoesPorDia[dia] = [];
         }
 
-        //se for uma despesa, o valor deverá ser convertido para negativo
-        if (transacoes[i].tipo === 2) {
-            transacoes[i].valor = -transacoes[i].valor;
-
-        }
-
-        transacoesPorDia[String(diaAtual)].push(transacoes[i].valor);
+        transacoesPorDia[dia].push(transacoes[i]);
+        
     }
+
+    // let diasJaContabilizados = [];
+
+    // for (let i = 0; i < transacoes.length; i++){
+    //     // const arrayData = transacoes[i].dtTransacao.split('-');
+    //     // const diaAtual = arrayData[2].substring(0,2);
+
+    //     //Verifica se esse dia já existe no array (se não existe, o resultado será "-1")
+    //     if (diasJaContabilizados.indexOf(diaAtual) == -1){
+    //         diasJaContabilizados.push(diaAtual);
+    //     }
+
+    //     //se for uma despesa, o valor deverá ser convertido para negativo
+    //     if (transacoes[i].tipo === 2) {
+    //         transacoes[i].valor = -transacoes[i].valor;
+
+    //     }
+
+    //     transacoesPorDia[String(diaAtual)].push(transacoes[i].valor);
+    // }
 
     //essa lista tem todas as entradas e saídas separadas por dia
     return transacoesPorDia;
@@ -318,6 +333,7 @@ const ExibirTransacoes = (entradasESaidas, saldoAnterior) => {
     let saldoAtual = 0;
     //Object.keys(objeto) retorna um array contendo o nome de todas as chaves (keys) daquele objeto
     const listaDias = Object.keys(entradasESaidas);
+    console.log(entradasESaidas);
     //se listaDias tiver tamanho de 0, significa que "entradasESaidas" também é um objeto vazio
     if (listaDias.length != 0) {
         return listaDias.map(
@@ -330,33 +346,31 @@ const ExibirTransacoes = (entradasESaidas, saldoAnterior) => {
             let saidaTotal = 0;
             
             let resultado = 0;
+            
+            const diaAtual = entradasESaidas[String(element)];
 
-            //element é somente o número dia, precisamos converter em uma string e colocar entre "[]" após o nome do objeto "entradasESaidas" para procurar por uma propriedade do objeto que tenha como nome esse dia
-            if (entradasESaidas[String(element)].length != 0){
-                const diaAtual = entradasESaidas[String(element)];
-                //itera da primeira transação do dia atual até a última transação do dia atual
-                for (let i = 0; i < diaAtual.length; i++)
-                //ATENCAO: COLOCAR COMPORTAMENTO PRA CASO TENHA 0 TRANSACOES NESSE DIA
-                {
-                    //identifica se é uma entrada, e se for, adiciona à lista de entradas
-                    if (diaAtual[i] >= 0){
-                        entradaTotal += diaAtual[i];
-                        entradas.push(diaAtual[i]);
-                    }
-                    
-                    //se não for uma entrada, então será uma saída. Adiciona à lista de saídas. Como o número é negativo, deverá ser feito uma soma ao valor total de saída
-                    else {
-                        saidaTotal += diaAtual[i];
-                        saidas.push(diaAtual[i]);
-                    }
-                
+            //itera da primeira transação do dia atual até a última transação do dia atual
+            for (let i = 0; i < diaAtual.length; i++)
+            //ATENCAO: COLOCAR COMPORTAMENTO PRA CASO TENHA 0 TRANSACOES NESSE DIA
+            {
+                const transacaoAtual = diaAtual[i];
+                //identifica se é uma entrada, e se for, adiciona à lista de entradas
+                if (transacaoAtual.tipo == 1){
+                    entradaTotal += transacaoAtual.valor;
+                    entradas.push(transacaoAtual.valor);
                 }
-        
-                //é uma soma pois o valor de "saidaTotal" é negativo
-                resultado = entradaTotal + saidaTotal;
-
-                //FALTANDO: vai ter que pegar saldo do último dia do mês anterior usando fetch, guarder em UseState?
+                
+                //se não for uma entrada, então será uma saída. Adiciona à lista de saídas. Como é uma saída, deve ser feita uma subtração.
+                else {
+                    saidaTotal -= transacaoAtual.valor;
+                    saidas.push(transacaoAtual.valor);
+                }
+            
             }
+    
+            //é uma soma pois o valor de "saidaTotal" é negativo
+            resultado = entradaTotal + saidaTotal;
+
 
             if (index == 0)
             {
@@ -379,6 +393,9 @@ const ExibirTransacoes = (entradasESaidas, saldoAnterior) => {
                 </tr>
             );
         });
+    }
+    else {
+        return (<tr><td colSpan={5}>Não houveram movimentações neste mês</td></tr>);
     }
 }
 

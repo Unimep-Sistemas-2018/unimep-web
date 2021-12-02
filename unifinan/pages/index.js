@@ -8,11 +8,22 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup'
 import Spinner from "react-bootstrap/Spinner";
 
 import {CSSTransition} from 'react-transition-group';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+const ShowKey = () => {
+  const senha = document.getElementById('key');
+
+  if(senha.type == "password") {
+    senha.type = "text"
+  } else if(senha.type == "text") {
+    senha.type = "password"
+  }
+}
 
 const HandleClick = async (email, senha,setInvalido, setCarregando) => {
   if (email == "" || senha == ""){
@@ -85,7 +96,9 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
             </Form.Group>
             <Form.Group className="mb-3" controlId="formSenha">
               <Form.Label style={{color: "Gold"}}>Senha</Form.Label>
-              <Form.Control name="password" onChange={e => setSenha(e.target.value)} placeholder="Sua senha" value={senha} type="password"/>
+              <InputGroup> 
+                <Form.Control id="key" name="password" onChange={e => setSenha(e.target.value)} placeholder="Sua senha" value={senha} style={{borderRight: "0"}} type="password"/>
+              </InputGroup>
             </Form.Group>
               {/* <Form.Group className="d-flex mb-3" controlId="formformCheck">
                 <Form.Check className="" type="checkbox"></Form.Check>
