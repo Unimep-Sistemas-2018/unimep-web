@@ -37,7 +37,8 @@ const HandleClick = async (email, senha,setInvalido, setCarregando) => {
     await fetch(url, headers)
       .then((response) => response.json())
     .then(response2 => {
-      if (typeof response2.access_token == 'undefined' || response2.access_token == null){
+      setCarregando(false);
+      if (typeof response2.access_token == 'undefined' || response2.access_token == null || response2.access_token == ""){
         console.log("token indefinida");
         setInvalido(true);
       }
@@ -60,7 +61,7 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
         <Container className="mt-3">
         <Container className="d-flex flex-column mt-5">
           <Button className="mt-5 mb-4" onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
-          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Criar uma conta</Button>
+          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} onClick={() => {Router.push('/cadastro');}} variant="secondary">Criar uma conta</Button>
           {/* <Container className="my-4" style={{color: "LightGray"}}>
             <hr />
           </Container> */}
@@ -127,6 +128,7 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  //Reseta a token ao entrar na página de login
 
   let varCard = VerificarVarCard(logando, setLogando, email, setEmail, senha, setSenha, setInvalido, carregando, setCarregando);
   let alerta = VerificarInvalido(invalido);
@@ -147,6 +149,7 @@ export default function Login() {
     );
 
   useEffect(()=>{
+    localStorage.removeItem('token');  
     varCard = VerificarVarCard(logando, setLogando);
     alerta = VerificarInvalido(invalido);
   });
