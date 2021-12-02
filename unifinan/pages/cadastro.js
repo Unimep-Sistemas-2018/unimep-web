@@ -34,13 +34,12 @@ const Verify = (setCadastro) => {
   const login = document.getElementById('email').value;
   const senhaUm = document.getElementById('key').value;
   const senhaDois = document.getElementById('confKey').value;
-  const doc = document.getElementById('cpf').value;
 
   if((senhaUm == senhaDois) && (nome != "") && (login != "")){
     const requestOptions = {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM4NDg0NjA0LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiMEZhTlU0bTd0ZEJVZWRiNHBiZkw4NGJHeEJVIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.68UthgP0qXfPkzVRah5bycMY5gBzBh0hfjBAdwEo3Tksdddddddddddddddddddddd', "Content-Type":"application/json;charset=UTF-8" },
-      body: `{"nome":"${nome}", "login":"${login}", "senha":"${senhaUm}", "doc":"${doc}"}`,
+      headers: { "Content-Type":"application/json;charset=UTF-8" },
+      body: `{"nome":"${nome}", "login":"${login}", "senha":"${senhaUm}"}`,
     };
     fetch('https://unifinan-api.herokuapp.com/usuarios/standard', requestOptions)
     .then(response => response.json())
@@ -51,9 +50,10 @@ const Verify = (setCadastro) => {
         alert("Verifique seu E-mail, para confirmar o cadastro");
         setCadastro(true);
       } else {
-        console.log(`{"nome":"${nome}", "login":"${login}", "senha":"${senhaUm}", "doc":"${doc}"}`)
+        console.log(`{"nome":"${nome}", "login":"${login}", "senha":"${senhaUm}"}`)
       }
     });
+    
   } else {
     if(senhaUm != senhaDois){
       alert("Senhas não são compatíveis.");
@@ -72,8 +72,6 @@ export default function Cadastro() {
     }
   })
 
-  
-
   return (
     <Form>
       <body>
@@ -82,7 +80,6 @@ export default function Cadastro() {
           <form>
             <input type="text" id="name" name="name" placeholder="Nome Completo"/>
             <input type="email" id="email" name="email" placeholder="E-Mail"/>
-            <input type="text" id="cpf" name="cpf" placeholder="CPF"/>
             <input type="password" id="key" name="key" placeholder="Sua Senha" />
             <input type="password" id="confKey" name="confKey" placeholder="Confirme sua Senha"/>
             <input value="Cadastrar" onClick={() => {Verify(setCadastro);}} />
