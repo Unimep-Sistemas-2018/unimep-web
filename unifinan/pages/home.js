@@ -18,7 +18,7 @@ const monta_lista = (lista_api) => {
                     <td>{element.categoria}</td>
                     <td>{element.descricao}</td>
                     <td>{data_format.toLocaleDateString()}</td>
-                    <td>{parseFloat(element.valor).toFixed(2)}</td>
+                    <td>{parseFloat(element.valor).toFixed(2).replace(".", ",")}</td>
                 </tr>
             )
         }))
@@ -39,40 +39,64 @@ const monta_saldo = (saldo) => {
 
 export default function Home() {
 
-    const requestOptions = {
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJtYXJpYUBnbWFpbC5jb20iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNjM3OTc0MTU0LCJ1c2VyTmFtZSI6Ik1hcmlhIiwidXNlcklkIjoxLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoic1h5dDVOUlVwekhGOWxRM0JfbzJJX2tOX2pnIiwiY2xpZW50X2lkIjoidW5pZmluYW4tdGVzdCJ9.fUH5uPmnYYYx7uAWrCpF8YzrQJE3ZprYs_jZcdVSlSo',
-            "Content-Type": "application/json;charset=UTF-8"
+    
+    const requestOptions = (token) => {
+        return(
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    "Content-Type": "application/json;charset=UTF-8"
+                }   
         }
+        )
     };
+
+    
 
     function carregalista(mes) {
         
-        fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=' + mes + '&ano=2021&pagina=0&itensPorPagina=10', requestOptions)
+        fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=' + mes + '&ano=2021&pagina=0&itensPorPagina=10', requestOptions(window.localStorage.getItem('token')))
             .then(response => response.json())
             .then(data => setList_trasancao(data.content))
     }
 
     function carregaSaldo(mes) {
-        fetch('https://unifinan-api.herokuapp.com/contas/1/saldo?mes='+ mes +'&ano=2021', requestOptions)
+        fetch('https://unifinan-api.herokuapp.com/contas/1/saldo?mes='+ mes +'&ano=2021', requestOptions(window.localStorage.getItem('token')))
         .then(response => response.json())
         .then(data => setsaldo(data.content))
     }
 
+    function carregaEntrada(mes) {
+        fetch('https://unifinan-api.herokuapp.com/contas/1/saldo?mes='+ mes +'&ano=2021', requestOptions(window.localStorage.getItem('token')))
+        .then(response => response.json())
+        .then(data => setentrada(data.content))
+    }
+    
     const [list_trasancao, setList_trasancao] = useState([])
     const [saldo, setsaldo] = useState("")
+    const [entrada, setentrada] = useState("")
+  
 
     useEffect(() => {
-        carregalista(parseInt("07",10))
-        carregaSaldo(parseInt("07",10))
+        requestOptions(window.localStorage.getItem('token'))
+        var data = new Date().toLocaleString('default', { month: 'numeric' })
+        carregalista(parseInt(data,10))
+        carregaSaldo(parseInt(data,10))
+        carregaEntrada(parseInt(data,10))
     }, [])
-
 
     return (
         <div className="home">
             <Header />
+            
             <div className="formCadastro">
+                <div className="row mt-2">
+                    <div className="col-lg-3">
+                        <a href="./categorias" className="btn btn-primary float-right" >Adicionar Categoria</a>
+                        
+                    </div>
+                </div>
                 <div className="row mt-5">
                     <div className="col-md-12 text-center">
                         <h3>Setembro</h3>
@@ -82,13 +106,13 @@ export default function Home() {
                     <div className="col-md-4">
                         <div className="card_custom border_cards">
                             <p className="text-center text-success card_txtCabecalho">Entrada</p>
-                            <p className="text-center text-success card_txtValor">R$ 500,00</p>
+                            <p className="text-center text-success card_txtValor">{"R$" + typeof list_trasancao == "undefined" ? null : monta_saldo(entrada)  }</p>
                         </div>
                     </div>
                     <div className="col-md-4">
                         <div className="card_main border_cards">
                             <p className="text-center card_txtCabecalho">Saldo Atual</p>
-                            <p className="text-center card_txtValor">{"R$" +  monta_saldo(saldo)  }</p>
+                            <p className="text-center card_txtValor">{"R$" + typeof list_trasancao == "undefined" ? null : monta_saldo(saldo)  }</p>
                         </div>
                     </div>
                     <div className="col-md-4">
@@ -115,8 +139,8 @@ export default function Home() {
                             </thead>
                             <tbody>
                                 {
-                                    //typeof list_trasancao == "undefined" ? null : monta_lista(list_trasancao)
-                                    monta_lista(list_trasancao)
+                                    typeof list_trasancao == "undefined" ? null : monta_lista(list_trasancao)
+                                    
                                 }
                             </tbody>
                         </table>
@@ -124,6 +148,6 @@ export default function Home() {
                 </div>
             </div>
         </div>
-
+        
     )
 }
