@@ -38,7 +38,7 @@ const HandleClick = async (email, senha,setInvalido, setCarregando) => {
       .then((response) => response.json())
     .then(response2 => {
       setCarregando(false);
-      if (typeof response2.access_token == 'undefined' || response2.access_token == null){
+      if (typeof response2.access_token == 'undefined' || response2.access_token == null || response2.access_token == ""){
         console.log("token indefinida");
         setInvalido(true);
       }
@@ -129,6 +129,7 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  //Reseta a token ao entrar na página de login
 
   let varCard = VerificarVarCard(logando, setLogando, email, setEmail, senha, setSenha, setInvalido, carregando, setCarregando);
   let alerta = VerificarInvalido(invalido);
@@ -149,6 +150,7 @@ export default function Login() {
     );
 
   useEffect(()=>{
+    localStorage.removeItem('token');  
     varCard = VerificarVarCard(logando, setLogando);
     alerta = VerificarInvalido(invalido);
   });
