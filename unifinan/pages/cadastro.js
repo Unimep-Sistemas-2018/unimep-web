@@ -45,6 +45,9 @@ const Verify = (setCadastro) => {
     .then(response => response.json())
     .then(data => {
       console.log(data)
+      
+      const aux = data.id;
+
       if (typeof data.errors == 'undefined' || data.errors == null){
         console.log('Success');
         alert("Verifique seu E-mail, para confirmar o cadastro");
@@ -53,7 +56,6 @@ const Verify = (setCadastro) => {
         console.log(`{"nome":"${nome}", "login":"${login}", "senha":"${senhaUm}"}`)
       }
     });
-    
   } else {
     if(senhaUm != senhaDois){
       alert("Senhas não são compatíveis.");

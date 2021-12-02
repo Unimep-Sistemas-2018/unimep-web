@@ -13,13 +13,13 @@ import {useEffect, useState} from "react";
 
 
 
-const Verify = (setCadastro) => {
+const Verify = (setCadastro, token) => {
   const cod = document.getElementById('cod').value;
 
   if((cod != "") && (cod != " ")){
     const requestOptions = {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ', 
+      headers: { 'Authorization': `Bearer ${token}`, 
       "Content-Type":"application/json;charset=UTF-8" },
       body: JSON.stringify({
         'codigo':cod
@@ -35,11 +35,11 @@ const Verify = (setCadastro) => {
 }
 
 export default function Cadastro() {
-  const [token]
+  const [token, setToken] = useState("");
   const[cadastro, setCadastro] = useState(false);
 
   useEffect(() => {
-    token = localStorage.getItem('token');
+    setToken(localStorage.getItem('token'));
     if(cadastro == true) {
       // Router.push('/')
     }
@@ -51,7 +51,7 @@ export default function Cadastro() {
         <div className="formCadastro">      
           <form>
             <input type="text" id="cod" name="cod" placeholder="Código de Confirmação"/>
-            <input value="Cadastrar" onClick={() => {Verify(setCadastro);}} />
+            <input value="Cadastrar" onClick={() => {Verify(setCadastro, token);}} />
           </form>
         </div>
       </body>
