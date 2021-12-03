@@ -55,7 +55,6 @@ export default function Cadastro_Cat() {
                 
         }
     }
-
     function carregaLista() {
         fetch('https://unifinan-api.herokuapp.com/categorias', requestOptions(window.localStorage.getItem('token')))
             .then(response => response.json())

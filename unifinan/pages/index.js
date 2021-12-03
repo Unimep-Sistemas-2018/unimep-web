@@ -144,7 +144,6 @@ export default function Login() {
     
     bodyStyle.alignItems = "center";
     bodyStyle.display = "flex";
-    bodyStyle.height = "100%";
     bodyStyle.justifyContent = "center";
     bodyStyle.width = "100%";}, []
     );

@@ -15,7 +15,8 @@ const monta_lista = (lista_api) => {
                 //numero,cate,desc,data,valor
                 <tr key={element.id}>
                     <td>{element.id}</td>
-                    <td>{element.categoria}</td>
+                    <td>{element.tipo == '1' ? "Entrada" : "Saida"}</td>
+                    <td>{element.categoriaObj?.nome}</td>
                     <td>{element.descricao}</td>
                     <td>{data_format.toLocaleDateString()}</td>
                     <td>{parseFloat(element.valor).toFixed(2).replace(".", ",")}</td>
@@ -29,6 +30,7 @@ const monta_saldo = (saldo) => {
     if (!saldo) {
         return ("Não foram encontrados movimentações")
     } else {
+        
         return (saldo.map((element, index) => {
             return (
                 element.saldo
@@ -36,6 +38,34 @@ const monta_saldo = (saldo) => {
         }))
     }
 }
+
+const monta_entrada_ou_saida = (retorno_api, filter) => {
+    if (!retorno_api) {
+        return ("0,00")
+    } else {
+        const saldoEntradas = retorno_api.filter( e => e.tipo == 1)
+        const saldoSaidas = retorno_api.filter( e => e.tipo == 2)
+
+        function getTotal(total, item) {
+            return total + parseFloat(item.valor) 
+        }
+        var totalEntrada = saldoEntradas.reduce(getTotal, 0);
+        var totalSaida =  saldoSaidas.reduce(getTotal,0)
+        var totalFinal
+
+        if (filter == 1) {
+            totalFinal = totalEntrada
+        }else{
+            totalFinal = totalSaida
+        }
+        return (
+            
+            totalFinal.toFixed(2)
+        )
+        
+    }
+}
+
 
 export default function Home() {
 
@@ -56,19 +86,19 @@ export default function Home() {
 
     function carregalista(mes) {
         
-        fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=' + mes + '&ano=2021&pagina=0&itensPorPagina=10', requestOptions(window.localStorage.getItem('token')))
+        fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=' + mes + '&ano=2021&pagina=0&itensPorPagina=100', requestOptions(window.localStorage.getItem('token')))
             .then(response => response.json())
             .then(data => setList_trasancao(data.content))
     }
 
     function carregaSaldo(mes) {
-        fetch('https://unifinan-api.herokuapp.com/contas/1/saldo?mes='+ mes +'&ano=2021', requestOptions(window.localStorage.getItem('token')))
+        fetch('https://unifinan-api.herokuapp.com/contas/1/saldo?mes='+ mes +'&ano=2021&pagina=0&itensPorPagina=100', requestOptions(window.localStorage.getItem('token')))
         .then(response => response.json())
         .then(data => setsaldo(data.content))
     }
 
     function carregaEntrada(mes) {
-        fetch('https://unifinan-api.herokuapp.com/contas/1/saldo?mes='+ mes +'&ano=2021', requestOptions(window.localStorage.getItem('token')))
+        fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=' + mes + '&ano=2021&pagina=0&itensPorPagina=100', requestOptions(window.localStorage.getItem('token')))
         .then(response => response.json())
         .then(data => setentrada(data.content))
     }
@@ -93,20 +123,24 @@ export default function Home() {
             <div className="formCadastro">
                 <div className="row mt-2">
                     <div className="col-lg-3">
-                        <a href="./categorias" className="btn btn-primary float-right" >Adicionar Categoria</a>
+                        <a href="./categorias" className="btn btn-primary float-right" >Categorias</a>
+                        
+                    </div>
+                    <div className="col-lg-3">
+                        <a href="./transacoes" className="btn btn-primary float-right" >Nova Transação</a>
                         
                     </div>
                 </div>
                 <div className="row mt-5">
                     <div className="col-md-12 text-center">
-                        <h3>Setembro</h3>
+                        <h3>{}</h3>
                     </div>
                 </div>
                 <div className="row container_cards ">
                     <div className="col-md-4">
                         <div className="card_custom border_cards">
                             <p className="text-center text-success card_txtCabecalho">Entrada</p>
-                            <p className="text-center text-success card_txtValor">{"R$" + typeof list_trasancao == "undefined" ? null : monta_saldo(entrada)  }</p>
+                            <p className="text-center text-success card_txtValor">{"R$" + typeof list_trasancao == "undefined" ? null : "R$ " + monta_entrada_ou_saida(entrada, 1)  }</p>
                         </div>
                     </div>
                     <div className="col-md-4">
@@ -118,7 +152,7 @@ export default function Home() {
                     <div className="col-md-4">
                         <div className="card_custom border_cards">
                             <p className="text-center text-danger card_txtCabecalho">Saida</p>
-                            <p className="text-center text-danger card_txtValor">R$ 200,00</p>
+                            <p className="text-center text-danger card_txtValor">{"R$" + typeof list_trasancao == "undefined" ? null : "R$ " + monta_entrada_ou_saida(entrada, 2)}</p>
                         </div>
                     </div>
                 </div>
@@ -131,6 +165,7 @@ export default function Home() {
                             <thead>
                                 <tr>
                                     <th className="text-center">NUMERO</th>
+                                    <th className="text-center">TIPO</th>
                                     <th className="text-center">CATEGORIA</th>
                                     <th className="text-center">DESCRIÇÃO</th>
                                     <th className="text-center">DATA</th>
