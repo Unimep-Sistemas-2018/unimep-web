@@ -29,7 +29,7 @@ const ShowKey = () => {
   }
 }
 
-const Verify = (setCadastro) => {
+const Verify = (setCadastro, setId) => {
   const nome = document.getElementById('name').value;
   const login = document.getElementById('email').value;
   const senhaUm = document.getElementById('key').value;
@@ -45,10 +45,11 @@ const Verify = (setCadastro) => {
     .then(response => response.json())
     .then(data => {
       console.log(data)
-      
-      const aux = data.id;
+
+      setId(data.id);
 
       if (typeof data.errors == 'undefined' || data.errors == null){
+
         console.log('Success');
         alert("Verifique seu E-mail, para confirmar o cadastro");
         setCadastro(true);
@@ -67,10 +68,11 @@ const Verify = (setCadastro) => {
 
 export default function Cadastro() {
   const[cadastro, setCadastro] = useState(false);
+  const[id, setId] = useState(null);
 
   useEffect(() => {
     if(cadastro == true) {
-      // Router.push('/')
+      Router.push(`/`)
     }
   })
 
@@ -84,7 +86,7 @@ export default function Cadastro() {
             <input type="email" id="email" name="email" placeholder="E-Mail"/>
             <input type="password" id="key" name="key" placeholder="Sua Senha" />
             <input type="password" id="confKey" name="confKey" placeholder="Confirme sua Senha"/>
-            <input value="Cadastrar" onClick={() => {Verify(setCadastro);}} />
+            <input value="Cadastrar" onClick={() => {Verify(setCadastro, setId);}} />
             <img src="https://cdn0.iconfinder.com/data/icons/ui-icons-pack/100/ui-icon-pack-14-512.png" id="olho" className="olho" onClick={() => {ShowKey();}} />
             <img src="https://cdn0.iconfinder.com/data/icons/ui-icons-pack/100/ui-icon-pack-14-512.png" id="olho2" className="olho2" onClick={() => {ShowKey();}} />
           </form>
