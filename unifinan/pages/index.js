@@ -57,7 +57,13 @@ const HandleClick = async (email, senha,setInvalido, setCarregando) => {
         setInvalido(false);
         console.log("Sucesso: " + response2.access_token);
         localStorage.setItem('token', response2.access_token);
-        Router.push('/home');
+        if (response2.userStatus == "ATIVO"){
+          Router.push('/home');
+        }
+        else {
+          Router.push('/mail');
+        }
+        
       }
     }).catch(error => {
       console.log("Error: ", error)});
