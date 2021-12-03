@@ -61,6 +61,7 @@ const HandleClick = async (email, senha,setInvalido, setCarregando) => {
           Router.push('/home');
         }
         else {
+          localStorage.setItem('id', response2.access_token);
           Router.push('/mail');
         }
         
