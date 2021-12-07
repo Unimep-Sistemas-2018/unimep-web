@@ -45,7 +45,7 @@ const monta_entrada_ou_saida = (retorno_api, filter) => {
     } else {
         const saldoEntradas = retorno_api.filter( e => e.tipo == 1)
         const saldoSaidas = retorno_api.filter( e => e.tipo == 2)
-
+        
         function getTotal(total, item) {
             return total + parseFloat(item.valor) 
         }
@@ -55,8 +55,10 @@ const monta_entrada_ou_saida = (retorno_api, filter) => {
 
         if (filter == 1) {
             totalFinal = totalEntrada
-        }else{
+        }else if (filter == 2) {
             totalFinal = totalSaida
+        }else{
+            totalFinal = totalEntrada - totalSaida
         }
         return (
             
@@ -97,6 +99,7 @@ export default function Home() {
         .then(data => setsaldo(data.content))
     }
 
+
     function carregaEntrada(mes) {
         fetch('https://unifinan-api.herokuapp.com/transacoes?conta=1&mes=' + mes + '&ano=2021&pagina=0&itensPorPagina=100', requestOptions(window.localStorage.getItem('token')))
         .then(response => response.json())
@@ -113,6 +116,7 @@ export default function Home() {
         var data = new Date().toLocaleString('default', { month: 'numeric' })
         carregalista(parseInt(data,10))
         carregaSaldo(parseInt(data,10))
+        
         carregaEntrada(parseInt(data,10))
     }, [])
 
@@ -145,8 +149,11 @@ export default function Home() {
                     </div>
                     <div className="col-md-4">
                         <div className="card_main border_cards">
-                            <p className="text-center card_txtCabecalho">Saldo Atual</p>
-                            <p className="text-center card_txtValor">{"R$" + typeof list_trasancao == "undefined" ? null : monta_saldo(saldo)  }</p>
+                            <p className="text-center card_txtCabecalho">Saldo Total</p>
+                            <p className="text-center card_txtValor">{"R$" + typeof list_trasancao == "undefined" ? null :`R$ ${monta_saldo(saldo)}`}</p>
+                            <p className="text-center saldo-mensal"><label>Saldo Mensal </label> <br/> <label>{"R$" + typeof list_trasancao == "undefined" ? null : "R$ " + monta_entrada_ou_saida(entrada, 3)  }</label></p>
+    
+
                         </div>
                     </div>
                     <div className="col-md-4">

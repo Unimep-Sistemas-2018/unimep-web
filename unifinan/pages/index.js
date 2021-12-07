@@ -80,7 +80,7 @@ const VerificarVarCard = (logando, setLogando, email, setEmail, senha, setSenha,
         <Container className="d-flex flex-column mt-5">
           <Button onClick={() => {setLogando(true);}} style={{color: "Gold", fontWeight:"600", height: "3rem"}} variant="secondary">Fazer Login</Button>
           <Button className="mt-2 mb-2" style={{color: "Gold", fontWeight:"600", height: "3rem"}} onClick={() => {Router.push('/cadastro');}} variant="secondary">Criar uma conta</Button>
-          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} onClick={() => {Router.push('/cadastro');}} variant="secondary">Confirmar E-mail</Button>
+          <Button style={{color: "Gold", fontWeight:"600", height: "3rem"}} onClick={() => {Router.push('/mail');}} variant="secondary">Confirmar E-mail</Button>
           {/* <Container className="my-4" style={{color: "LightGray"}}>
             <hr />
           </Container> */}

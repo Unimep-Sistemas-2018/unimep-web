@@ -17,6 +17,11 @@
     font-weight: 400;
 }
 
+.saldo-mensal{
+    color: gray;
+    font-size: 20px;
+}
+
 .cardHeader {
     padding: .3rem 1rem;
     margin-bottom: 0;
