@@ -13,7 +13,7 @@ import {useEffect, useState} from "react";
 
 
 
-const Verify = (setCadastro, token) => {
+const Verify = (setCadastro, token, id) => {
   const cod = document.getElementById('cod').value;
 
   if((cod != "") && (cod != " ")){
@@ -24,11 +24,9 @@ const Verify = (setCadastro, token) => {
       body: JSON.stringify({
         'codigo':cod
       })
-      // body: `{"codigo":"${cod}"}`,
     };
-    fetch('https://unifinan-api.herokuapp.com/usuarios/standard/560/confirmar', requestOptions)
-    .then(response => console.log(response.status));
-    
+    fetch(`https://unifinan-api.herokuapp.com/usuarios/standard/${id}/confirmar`, requestOptions)
+    .then(response => response.status == 200 ? Router.push('/home') : alert("Erro na validação."));
   } else {
       alert("Error");
     }
@@ -36,12 +34,14 @@ const Verify = (setCadastro, token) => {
 
 export default function Cadastro() {
   const [token, setToken] = useState("");
+  const [id, setId] = useState("");
   const[cadastro, setCadastro] = useState(false);
 
   useEffect(() => {
     setToken(localStorage.getItem('token'));
+    setId(localStorage.getItem('id'));
     if(cadastro == true) {
-      // Router.push('/')
+      Router.push('/home')
     }
   },[])
   
@@ -51,7 +51,7 @@ export default function Cadastro() {
         <div className="formCadastro">      
           <form>
             <input type="text" id="cod" name="cod" placeholder="Código de Confirmação"/>
-            <input value="Cadastrar" onClick={() => {Verify(setCadastro, token);}} />
+            <input value="Cadastrar" onClick={() => {Verify(setCadastro, token, id);}} />
           </form>
         </div>
       </body>

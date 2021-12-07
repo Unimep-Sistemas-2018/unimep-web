@@ -45,13 +45,11 @@ const Verify = (setCadastro, setId) => {
     .then(response => response.json())
     .then(data => {
       console.log(data)
-
       setId(data.id);
-
       if (typeof data.errors == 'undefined' || data.errors == null){
 
         console.log('Success');
-        alert("Verifique seu E-mail, para confirmar o cadastro");
+        alert("Faça o login, e depois verifique seu E-mail, para confirmar o cadastro");
         setCadastro(true);
       } else {
         console.log(`{"nome":"${nome}", "login":"${login}", "senha":"${senhaUm}"}`)
