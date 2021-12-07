@@ -125,16 +125,7 @@ export default function Home() {
             <Header />
             
             <div className="formCadastro">
-                <div className="row mt-2">
-                    <div className="col-lg-3">
-                        <a href="./categorias" className="btn btn-primary float-right" >Categorias</a>
-                        
-                    </div>
-                    <div className="col-lg-3">
-                        <a href="./transacoes" className="btn btn-primary float-right" >Nova Transação</a>
-                        
-                    </div>
-                </div>
+
                 <div className="row mt-5">
                     <div className="col-md-12 text-center">
                         <h3>{}</h3>
@@ -164,7 +155,10 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="row mt-5">
-                    <h5>Sua atividade:</h5>
+                    <div className="col-10"><h5>Sua atividade:</h5></div>
+                    <div className="col-2">
+                        <a href="./transacoes" className="btn btn-success float-end text-white" title="Novas Transações"> <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z"/></svg></a>
+                    </div>
                 </div>
                 <div className="row container_cards">
                     <div className="col-md-12">
